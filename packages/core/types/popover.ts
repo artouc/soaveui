@@ -5,6 +5,13 @@ export interface PopoverProps {
     side?: PopoverSide
     align?: PopoverAlign
     modal?: boolean
+    class?: string
+    unstyled?: boolean
+}
+
+export interface PopoverContentProps {
+    class?: string
+    unstyled?: boolean
 }
 
 export interface PopoverContext {

@@ -6,7 +6,7 @@ export default defineBuildConfig({
             builder: "mkdist",
             input: "./",
             outDir: "./dist",
-            pattern: ["**/*.ts", "**/*.vue"],
+            pattern: ["**/*.ts", "**/*.vue", "**/*.css"],
             declaration: true
         }
     ],

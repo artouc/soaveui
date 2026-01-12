@@ -3,7 +3,7 @@
         <Transition name="sheet-overlay">
             <div
                 v-if="is_open"
-                class="fixed inset-0 z-50 bg-black/80"
+                :class="overlay_classes"
                 @click="handleOverlayClick"
             />
         </Transition>
@@ -14,7 +14,7 @@
                 ref="sheet_element"
                 role="dialog"
                 aria-modal="true"
-                :class="cn(base_classes, side_classes[side], props.class)"
+                :class="[computed_classes, props.class]"
                 tabindex="-1"
                 @keydown.escape="close"
             >
@@ -23,7 +23,7 @@
                 <button
                     v-if="show_close_button"
                     type="button"
-                    class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    :class="close_button_classes"
                     aria-label="Close"
                     @click="close"
                 >
@@ -49,20 +49,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, provide, onMounted, onUnmounted, type InjectionKey } from "vue"
-import { cn } from "../../utils/cn"
-import type { SheetSide, SheetContext } from "../../types/sheet"
+import { useStyleAdapter } from "../../composables"
+import type { SheetSide, SheetContext, SheetProps } from "../../types/sheet"
+import type { SheetState } from "../../types/composables"
 
-export interface Props {
-    open?: boolean
-    side?: SheetSide
-    show_close_button?: boolean
-    class?: string
-}
+interface Props extends SheetProps {}
 
 const props = withDefaults(defineProps<Props>(), {
     open: false,
     side: "right",
-    show_close_button: true
+    showCloseButton: true,
+    unstyled: false
 })
 
 const emit = defineEmits<{
@@ -71,6 +68,7 @@ const emit = defineEmits<{
 
 export const SHEET_CONTEXT_KEY: InjectionKey<SheetContext> = Symbol("sheet-context")
 
+const style_adapter = useStyleAdapter()
 const is_open = ref(props.open)
 const sheet_element = ref<HTMLElement | null>(null)
 
@@ -114,9 +112,28 @@ watch(is_open, (open) => {
     }
 })
 
-const side = computed(() => props.side)
-
+const side = computed(() => props.side ?? "right")
+const show_close_button = computed(() => props.showCloseButton)
 const transition_name = computed(() => `sheet-${side.value}`)
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: SheetState = {
+        is_open: is_open.value,
+        side: side.value
+    }
+    return style_adapter.getClasses("sheet", state)
+})
+
+const overlay_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("sheet-overlay", {})
+})
+
+const close_button_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("sheet-close", {})
+})
 
 provide(SHEET_CONTEXT_KEY, {
     is_open: is_open.value,
@@ -124,15 +141,6 @@ provide(SHEET_CONTEXT_KEY, {
     open,
     close
 })
-
-const base_classes = "fixed z-50 gap-4 bg-background p-6 shadow-lg"
-
-const side_classes: Record<SheetSide, string> = {
-    top: "inset-x-0 top-0 border-b",
-    bottom: "inset-x-0 bottom-0 border-t",
-    left: "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
-    right: "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm"
-}
 </script>
 
 <style scoped>

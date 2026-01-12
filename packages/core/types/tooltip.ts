@@ -8,6 +8,13 @@ export interface TooltipProps {
     delay_duration?: number
     skip_delay_duration?: number
     disabled?: boolean
+    class?: string
+    unstyled?: boolean
+}
+
+export interface TooltipContentProps {
+    class?: string
+    unstyled?: boolean
 }
 
 export interface TooltipReturn {

@@ -1,12 +1,22 @@
 <template>
-    <h5 :class="cn('mb-1 font-medium leading-none tracking-tight', props.class)">
+    <h5 :class="[computed_classes, props.class]">
         <slot />
     </h5>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
 import type { AlertTitleProps } from "../../types/alert"
 
-const props = defineProps<AlertTitleProps>()
+const props = withDefaults(defineProps<AlertTitleProps>(), {
+    unstyled: false
+})
+
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("alert-title", {})
+})
 </script>

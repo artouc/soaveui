@@ -2,7 +2,7 @@
     <div
         role="menuitem"
         :tabindex="disabled ? -1 : 0"
-        :class="cn(item_classes, props.class)"
+        :class="[computed_classes, props.class]"
         :aria-disabled="disabled"
         :data-highlighted="is_active ? '' : undefined"
         :data-disabled="disabled ? '' : undefined"
@@ -17,18 +17,14 @@
 
 <script setup lang="ts">
 import { inject, computed, onMounted } from "vue"
-import { cn } from "../../utils/cn"
+import { useStyleAdapter } from "../../composables"
 import { DROPDOWN_CONTEXT_KEY } from "./DropdownMenu.vue"
+import type { DropdownItemProps } from "../../types/dropdown"
 
-export interface Props {
-    disabled?: boolean
-    destructive?: boolean
-    class?: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DropdownItemProps>(), {
     disabled: false,
-    destructive: false
+    destructive: false,
+    unstyled: false
 })
 
 const emit = defineEmits<{
@@ -42,6 +38,7 @@ if (!context) {
 }
 
 const { active_item_index, close, registerItem, setActiveItem } = context
+const style_adapter = useStyleAdapter()
 
 let item_index = -1
 
@@ -67,11 +64,8 @@ const handleMouseEnter = (): void => {
     }
 }
 
-const item_classes = computed(() => cn(
-    "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
-    "transition-colors focus:bg-accent focus:text-accent-foreground",
-    "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
-    "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-    props.destructive && "text-destructive focus:text-destructive"
-))
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("dropdown-item", {})
+})
 </script>

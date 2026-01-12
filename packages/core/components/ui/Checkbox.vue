@@ -1,7 +1,7 @@
 <template>
     <button
         type="button"
-        :class="composable.base_classes.value"
+        :class="[computed_classes, props.class]"
         :disabled="composable.is_disabled.value"
         :data-state="dataState"
         v-bind="composable.aria_attributes.value"
@@ -41,24 +41,45 @@
 <script setup lang="ts">
 import { computed, toRef } from "vue"
 import { useCheckbox } from "../../composables/useCheckbox"
+import { useStyleAdapter } from "../../composables/useUIConfig"
 import type { CheckboxProps } from "../../types/checkbox"
+import type { CheckboxState } from "../../types/composables"
 
 interface Props extends CheckboxProps {
     modelValue?: boolean
+    class?: string
+    unstyled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: false,
     disabled: false,
-    indeterminate: false
+    indeterminate: false,
+    unstyled: false
 })
 
 const emit = defineEmits<{
     "update:modelValue": [value: boolean]
 }>()
 
+const style_adapter = useStyleAdapter()
 const checked = toRef(() => props.modelValue)
 const composable = useCheckbox(toRef(() => props), checked)
+
+// StyleAdapterからクラスを取得
+const computed_classes = computed(() => {
+    if (props.unstyled) {
+        return ""
+    }
+
+    const state: CheckboxState = {
+        checked: props.modelValue,
+        disabled: composable.is_disabled.value,
+        indeterminate: composable.is_indeterminate.value
+    }
+
+    return style_adapter.getClasses("checkbox", state)
+})
 
 const dataState = computed(() => {
     if (props.indeterminate) return "indeterminate"

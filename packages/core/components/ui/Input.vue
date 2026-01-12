@@ -2,7 +2,7 @@
     <input
         :id="id"
         :type="type"
-        :class="composable.base_classes.value"
+        :class="[computed_classes, props.class]"
         :disabled="composable.is_disabled.value"
         :readonly="composable.is_readonly.value"
         :placeholder="placeholder"
@@ -15,19 +15,24 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from "vue"
+import { toRef, computed } from "vue"
 import { useInput } from "../../composables/useInput"
+import { useStyleAdapter, useUI } from "../../composables/useUIConfig"
 import type { InputProps, InputType } from "../../types/input"
+import type { InputState } from "../../types/composables"
 
 interface Props extends InputProps {
     id?: string
     modelValue?: string | number
+    class?: string
+    unstyled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     type: "text" as InputType,
     disabled: false,
-    readonly: false
+    readonly: false,
+    unstyled: false
 })
 
 const emit = defineEmits<{
@@ -35,7 +40,25 @@ const emit = defineEmits<{
     blur: [event: FocusEvent]
 }>()
 
+const ui_config = useUI("input")
+const style_adapter = useStyleAdapter()
 const composable = useInput(toRef(() => props))
+
+// StyleAdapterからクラスを取得
+const computed_classes = computed(() => {
+    if (props.unstyled) {
+        return ""
+    }
+
+    const state: InputState = {
+        size: props.size ?? ui_config.default_size,
+        disabled: composable.is_disabled.value,
+        readonly: composable.is_readonly.value,
+        error: props.error
+    }
+
+    return style_adapter.getClasses("input", state)
+})
 
 const handleInput = (event: Event) => {
     const target = event.target as HTMLInputElement

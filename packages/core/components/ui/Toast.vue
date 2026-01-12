@@ -1,15 +1,15 @@
 <template>
     <div
-        :class="cn(base_classes, variant_classes[variant], props.class)"
+        :class="[computed_classes, props.class]"
         :role="aria_role"
         :aria-live="aria_live"
         aria-atomic="true"
     >
         <div class="flex-1 space-y-1">
-            <div v-if="title" class="text-sm font-semibold">
+            <div v-if="title" :class="title_classes">
                 {{ title }}
             </div>
-            <div v-if="description" class="text-sm opacity-90">
+            <div v-if="description" :class="description_classes">
                 {{ description }}
             </div>
         </div>
@@ -18,7 +18,7 @@
             <button
                 v-if="action"
                 type="button"
-                :class="action_button_classes"
+                :class="action_classes"
                 @click="action.onClick"
             >
                 {{ action.label }}
@@ -27,7 +27,7 @@
             <button
                 v-if="dismissible"
                 type="button"
-                :class="dismiss_button_classes"
+                :class="dismiss_classes"
                 aria-label="Dismiss"
                 @click="emit('dismiss')"
             >
@@ -52,8 +52,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue"
-import { cn } from "../../utils/cn"
+import { useStyleAdapter } from "../../composables"
 import type { ToastVariant, ToastAction } from "../../types/toast"
+import type { ToastState } from "../../types/composables"
 
 export interface Props {
     title?: string
@@ -62,26 +63,48 @@ export interface Props {
     dismissible?: boolean
     action?: ToastAction
     class?: string
+    unstyled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     variant: "default",
-    dismissible: true
+    dismissible: true,
+    unstyled: false
 })
 
 const emit = defineEmits<{
     dismiss: []
 }>()
 
-const base_classes = "pointer-events-auto flex items-start gap-4 rounded-lg border p-4 shadow-lg transition-all"
+const style_adapter = useStyleAdapter()
 
-const variant_classes: Record<ToastVariant, string> = {
-    default: "bg-background text-foreground border-border",
-    success: "bg-green-50 text-green-900 border-green-200 dark:bg-green-950 dark:text-green-100 dark:border-green-800",
-    error: "bg-red-50 text-red-900 border-red-200 dark:bg-red-950 dark:text-red-100 dark:border-red-800",
-    warning: "bg-yellow-50 text-yellow-900 border-yellow-200 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-800",
-    info: "bg-blue-50 text-blue-900 border-blue-200 dark:bg-blue-950 dark:text-blue-100 dark:border-blue-800"
-}
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: ToastState = {
+        variant: props.variant
+    }
+    return style_adapter.getClasses("toast", state)
+})
+
+const title_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("toast-title", {})
+})
+
+const description_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("toast-description", {})
+})
+
+const action_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("toast-action", {})
+})
+
+const dismiss_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("toast-dismiss", {})
+})
 
 const aria_role = computed(() => {
     return props.variant === "error" ? "alert" : "status"
@@ -90,18 +113,4 @@ const aria_role = computed(() => {
 const aria_live = computed(() => {
     return props.variant === "error" ? "assertive" : "polite"
 })
-
-const action_button_classes = cn(
-    "inline-flex items-center justify-center rounded-md text-sm font-medium",
-    "h-8 px-3 ring-offset-background transition-colors",
-    "hover:bg-secondary focus-visible:outline-none focus-visible:ring-2",
-    "focus-visible:ring-ring focus-visible:ring-offset-2"
-)
-
-const dismiss_button_classes = cn(
-    "inline-flex items-center justify-center rounded-md",
-    "h-6 w-6 shrink-0 opacity-70 transition-opacity",
-    "hover:opacity-100 focus-visible:outline-none focus-visible:ring-2",
-    "focus-visible:ring-ring"
-)
 </script>

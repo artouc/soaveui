@@ -4,11 +4,20 @@ export type DropdownAlign = "start" | "center" | "end"
 export interface DropdownProps {
     side?: DropdownSide
     align?: DropdownAlign
+    class?: string
+    unstyled?: boolean
+}
+
+export interface DropdownContentProps {
+    class?: string
+    unstyled?: boolean
 }
 
 export interface DropdownItemProps {
     disabled?: boolean
     destructive?: boolean
+    class?: string
+    unstyled?: boolean
 }
 
 export interface DropdownContext {

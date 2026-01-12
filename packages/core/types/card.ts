@@ -12,20 +12,25 @@ export interface CardReturn {
 
 export interface CardHeaderProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface CardTitleProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface CardDescriptionProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface CardContentProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface CardFooterProps {
     class?: string
+    unstyled?: boolean
 }

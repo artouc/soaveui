@@ -7,7 +7,7 @@
             role="menu"
             :aria-labelledby="`${dropdown_id}-trigger`"
             :style="position_styles"
-            :class="cn(base_classes, props.class)"
+            :class="[computed_classes, props.class]"
             tabindex="-1"
             @keydown="handleContentKeyDown"
         >
@@ -17,15 +17,15 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watchEffect, nextTick, watch } from "vue"
-import { cn } from "../../utils/cn"
+import { inject, ref, computed, watchEffect, nextTick, watch } from "vue"
+import { useStyleAdapter } from "../../composables"
 import { DROPDOWN_CONTEXT_KEY } from "./DropdownMenu.vue"
+import type { DropdownContentProps } from "../../types/dropdown"
+import type { DropdownState } from "../../types/composables"
 
-export interface Props {
-    class?: string
-}
-
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<DropdownContentProps>(), {
+    unstyled: false
+})
 
 const context = inject(DROPDOWN_CONTEXT_KEY)
 
@@ -41,6 +41,7 @@ const {
     handleContentKeyDown
 } = context
 
+const style_adapter = useStyleAdapter()
 const content_element = ref<HTMLElement | null>(null)
 
 watchEffect(() => {
@@ -54,11 +55,13 @@ watch(is_open, async (open) => {
     }
 })
 
-const base_classes = cn(
-    "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1",
-    "text-popover-foreground shadow-md outline-none",
-    "animate-in fade-in-0 zoom-in-95"
-)
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: DropdownState = {
+        is_open: is_open.value
+    }
+    return style_adapter.getClasses("dropdown", state)
+})
 </script>
 
 <style scoped>

@@ -1,12 +1,22 @@
 <template>
-    <div :class="cn('flex flex-col space-y-1.5 p-6', props.class)">
+    <div :class="[computed_classes, props.class]">
         <slot />
     </div>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
 import type { CardHeaderProps } from "../../types/card"
 
-const props = defineProps<CardHeaderProps>()
+const props = withDefaults(defineProps<CardHeaderProps>(), {
+    unstyled: false
+})
+
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("card-header", {})
+})
 </script>

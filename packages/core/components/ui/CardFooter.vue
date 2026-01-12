@@ -1,12 +1,22 @@
 <template>
-    <div :class="cn('flex items-center p-6 pt-0', props.class)">
+    <div :class="[computed_classes, props.class]">
         <slot />
     </div>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
 import type { CardFooterProps } from "../../types/card"
 
-const props = defineProps<CardFooterProps>()
+const props = withDefaults(defineProps<CardFooterProps>(), {
+    unstyled: false
+})
+
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("card-footer", {})
+})
 </script>

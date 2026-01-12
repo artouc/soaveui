@@ -1,13 +1,13 @@
 <template>
     <Teleport to="body">
         <div
-            :class="cn(container_classes, position_classes[position], props.class)"
+            :class="[computed_classes, props.class]"
             aria-label="Notifications"
         >
             <TransitionGroup
                 name="toast"
                 tag="div"
-                :class="cn('flex flex-col', gap_class)"
+                class="flex flex-col gap-2"
             >
                 <Toast
                     v-for="toast in visible_toasts"
@@ -17,6 +17,7 @@
                     :variant="toast.variant"
                     :dismissible="toast.dismissible"
                     :action="toast.action"
+                    :unstyled="unstyled"
                     @dismiss="handleDismiss(toast.id)"
                 />
             </TransitionGroup>
@@ -26,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watchEffect } from "vue"
-import { cn } from "../../utils/cn"
+import { useStyleAdapter } from "../../composables"
 import { useToast } from "../../composables/useToast"
 import Toast from "./Toast.vue"
 import type { ToastPosition, Toast as ToastType } from "../../types/toast"
@@ -36,15 +37,18 @@ export interface Props {
     max_toasts?: number
     gap?: number
     class?: string
+    unstyled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     position: "bottom-right",
     max_toasts: 5,
-    gap: 8
+    gap: 8,
+    unstyled: false
 })
 
 const { toasts, dismiss } = useToast()
+const style_adapter = useStyleAdapter()
 
 const internal_toasts = ref<ToastType[]>([])
 
@@ -61,18 +65,10 @@ const handleDismiss = (id: string): void => {
     dismiss(id)
 }
 
-const container_classes = "fixed z-[100] flex pointer-events-none p-4"
-
-const position_classes: Record<ToastPosition, string> = {
-    "top-left": "top-0 left-0 flex-col",
-    "top-center": "top-0 left-1/2 -translate-x-1/2 flex-col items-center",
-    "top-right": "top-0 right-0 flex-col items-end",
-    "bottom-left": "bottom-0 left-0 flex-col-reverse",
-    "bottom-center": "bottom-0 left-1/2 -translate-x-1/2 flex-col-reverse items-center",
-    "bottom-right": "bottom-0 right-0 flex-col-reverse items-end"
-}
-
-const gap_class = computed(() => `gap-${props.gap / 4}`)
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("toaster", { position: props.position })
+})
 </script>
 
 <style scoped>

@@ -3,6 +3,8 @@ import type { Ref, DeepReadonly } from "vue"
 export interface DialogProps {
     open?: boolean
     modal?: boolean
+    showCloseButton?: boolean
+    unstyled?: boolean
 }
 
 export interface DialogReturn {
@@ -14,22 +16,27 @@ export interface DialogReturn {
 
 export interface DialogContentProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface DialogHeaderProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface DialogTitleProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface DialogDescriptionProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface DialogFooterProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface DialogTriggerProps {

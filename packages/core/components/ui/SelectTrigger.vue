@@ -2,15 +2,15 @@
     <button
         ref="button_ref"
         type="button"
-        :class="composable.base_classes.value"
-        :disabled="composable.is_disabled.value"
+        :class="[computed_classes, props.class]"
+        :disabled="is_disabled"
         :aria-expanded="context?.is_open.value"
         aria-haspopup="listbox"
         @click="handleClick"
     >
         <slot />
         <svg
-            class="h-4 w-4 opacity-50"
+            :class="icon_classes"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -25,14 +25,36 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, onMounted, onUnmounted } from "vue"
-import { useSelectTrigger } from "../../composables/useSelect"
-import type { SelectContext } from "../../types/select"
+import { inject, ref, computed, onMounted, onUnmounted } from "vue"
+import { useStyleAdapter } from "../../composables"
+import type { SelectContext, SelectTriggerProps } from "../../types/select"
 import { SELECT_KEY } from "../../types/select"
+import type { SelectState } from "../../types/composables"
+
+const props = withDefaults(defineProps<SelectTriggerProps>(), {
+    unstyled: false
+})
 
 const context = inject<SelectContext>(SELECT_KEY)
-const composable = useSelectTrigger()
+const style_adapter = useStyleAdapter()
 const button_ref = ref<HTMLButtonElement | null>(null)
+
+const is_disabled = computed(() => context?.disabled.value ?? false)
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: SelectState = {
+        size: context?.size.value ?? "md",
+        disabled: is_disabled.value,
+        is_open: context?.is_open.value ?? false
+    }
+    return style_adapter.getClasses("select", state)
+})
+
+const icon_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("select-trigger-icon", {})
+})
 
 onMounted(() => {
     context?.setTriggerRef(button_ref.value)

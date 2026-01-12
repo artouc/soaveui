@@ -6,18 +6,18 @@
                 class="fixed inset-0 z-50 flex items-center justify-center"
             >
                 <div
-                    class="fixed inset-0 bg-black/80"
+                    :class="overlay_classes"
                     @click="handleOverlayClick"
                 />
                 <div
-                    class="relative z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg"
+                    :class="[computed_classes, props.class]"
                     role="dialog"
                     aria-modal="true"
                 >
                     <slot />
                     <button
                         v-if="show_close_button"
-                        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+                        :class="close_button_classes"
                         @click="close"
                     >
                         <svg
@@ -45,22 +45,26 @@
 
 <script setup lang="ts">
 import { computed, provide, type InjectionKey } from "vue"
+import { useStyleAdapter } from "../../composables"
+import type { DialogProps } from "../../types/dialog"
+import type { DialogState } from "../../types/composables"
 
-interface Props {
-    open?: boolean
-    modal?: boolean
-    showCloseButton?: boolean
+interface DialogComponentProps extends DialogProps {
+    class?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<DialogComponentProps>(), {
     open: false,
     modal: true,
-    showCloseButton: true
+    showCloseButton: true,
+    unstyled: false
 })
 
 const emit = defineEmits<{
     "update:open": [value: boolean]
 }>()
+
+const style_adapter = useStyleAdapter()
 
 const is_open = computed({
     get: () => props.open,
@@ -68,6 +72,24 @@ const is_open = computed({
 })
 
 const show_close_button = computed(() => props.showCloseButton)
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: DialogState = {
+        is_open: is_open.value
+    }
+    return style_adapter.getClasses("dialog", state)
+})
+
+const overlay_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("dialog-overlay", {})
+})
+
+const close_button_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("dialog-close", {})
+})
 
 const close = () => {
     is_open.value = false

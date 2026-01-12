@@ -1,6 +1,6 @@
 {
     "name": "@soave/ui",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -25,6 +25,14 @@
         "./components": {
             "import": "./dist/components/ui/index.mjs",
             "types": "./dist/components/ui/index.d.ts"
+        },
+        "./adapters": {
+            "import": "./dist/adapters/index.mjs",
+            "types": "./dist/adapters/index.d.ts"
+        },
+        "./styles/css-variables.css": {
+            "import": "./dist/styles/css-variables.css",
+            "default": "./dist/styles/css-variables.css"
         }
     },
     "files": [

@@ -5,12 +5,16 @@ export type RadioSize = "sm" | "md" | "lg"
 export interface RadioGroupProps {
     disabled?: boolean
     orientation?: "horizontal" | "vertical"
+    class?: string
+    unstyled?: boolean
 }
 
 export interface RadioItemProps {
     value: string
     size?: RadioSize
     disabled?: boolean
+    class?: string
+    unstyled?: boolean
 }
 
 export interface RadioGroupContext {

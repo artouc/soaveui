@@ -1,12 +1,22 @@
 <template>
-    <div :class="cn('flex flex-col space-y-1.5 text-center sm:text-left', props.class)">
+    <div :class="[computed_classes, props.class]">
         <slot />
     </div>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
 import type { DialogHeaderProps } from "../../types/dialog"
 
-const props = defineProps<DialogHeaderProps>()
+const props = withDefaults(defineProps<DialogHeaderProps>(), {
+    unstyled: false
+})
+
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("dialog-header", {})
+})
 </script>

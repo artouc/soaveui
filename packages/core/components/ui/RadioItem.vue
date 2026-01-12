@@ -1,14 +1,16 @@
 <template>
     <button
         type="button"
-        :class="composable.base_classes.value"
-        :disabled="composable.is_disabled.value"
-        v-bind="composable.aria_attributes.value"
+        :class="[computed_classes, props.class]"
+        :disabled="is_disabled"
+        role="radio"
+        :aria-checked="is_checked"
+        :aria-disabled="is_disabled || undefined"
         @click="handleClick"
     >
         <span
-            v-if="composable.is_checked.value"
-            :class="composable.indicator_classes.value"
+            v-if="is_checked"
+            :class="indicator_classes"
         >
             <svg
                 class="fill-current"
@@ -21,20 +23,39 @@
 </template>
 
 <script setup lang="ts">
-import { inject, toRef } from "vue"
-import { useRadioItem } from "../../composables/useRadio"
+import { inject, computed } from "vue"
+import { useStyleAdapter } from "../../composables"
 import type { RadioItemProps, RadioGroupContext } from "../../types/radio"
 import { RADIO_GROUP_KEY } from "../../types/radio"
+import type { RadioState } from "../../types/composables"
 
 const props = withDefaults(defineProps<RadioItemProps>(), {
-    disabled: false
+    disabled: false,
+    unstyled: false
 })
 
 const context = inject<RadioGroupContext>(RADIO_GROUP_KEY)
-const composable = useRadioItem(toRef(() => props))
+const style_adapter = useStyleAdapter()
+
+const is_checked = computed(() => context?.model_value.value === props.value)
+const is_disabled = computed(() => props.disabled || context?.disabled.value || false)
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: RadioState = {
+        checked: is_checked.value,
+        disabled: is_disabled.value
+    }
+    return style_adapter.getClasses("radio", state)
+})
+
+const indicator_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("radio-indicator", {})
+})
 
 const handleClick = () => {
-    if (!composable.is_disabled.value && context) {
+    if (!is_disabled.value && context) {
         context.updateValue(props.value)
     }
 }

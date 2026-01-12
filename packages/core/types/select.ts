@@ -6,6 +6,29 @@ export interface SelectProps {
     size?: SelectSize
     disabled?: boolean
     placeholder?: string
+    unstyled?: boolean
+}
+
+export interface SelectTriggerProps {
+    class?: string
+    unstyled?: boolean
+}
+
+export interface SelectContentProps {
+    class?: string
+    unstyled?: boolean
+}
+
+export interface SelectItemProps {
+    value: string
+    disabled?: boolean
+    class?: string
+    unstyled?: boolean
+}
+
+export interface SelectValueProps {
+    class?: string
+    unstyled?: boolean
 }
 
 export interface SelectOption {

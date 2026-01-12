@@ -9,6 +9,8 @@ export interface ToastProps {
     duration?: number
     dismissible?: boolean
     action?: ToastAction
+    class?: string
+    unstyled?: boolean
 }
 
 export interface ToastAction {

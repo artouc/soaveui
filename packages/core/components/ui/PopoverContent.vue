@@ -7,7 +7,7 @@
             role="dialog"
             aria-modal="false"
             :style="position_styles"
-            :class="cn(base_classes, props.class)"
+            :class="[computed_classes, props.class]"
             tabindex="-1"
         >
             <slot />
@@ -16,15 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watchEffect, onMounted } from "vue"
-import { cn } from "../../utils/cn"
+import { inject, ref, computed, watchEffect, onMounted } from "vue"
+import { useStyleAdapter } from "../../composables"
 import { POPOVER_CONTEXT_KEY } from "./Popover.vue"
+import type { PopoverContentProps } from "../../types/popover"
+import type { PopoverState } from "../../types/composables"
 
-export interface Props {
-    class?: string
-}
-
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<PopoverContentProps>(), {
+    unstyled: false
+})
 
 const context = inject(POPOVER_CONTEXT_KEY)
 
@@ -39,6 +39,7 @@ const {
     position_styles
 } = context
 
+const style_adapter = useStyleAdapter()
 const content_element = ref<HTMLElement | null>(null)
 
 watchEffect(() => {
@@ -51,10 +52,13 @@ onMounted(() => {
     }
 })
 
-const base_classes = cn(
-    "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none",
-    "animate-in fade-in-0 zoom-in-95"
-)
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: PopoverState = {
+        is_open: is_open.value
+    }
+    return style_adapter.getClasses("popover", state)
+})
 </script>
 
 <style scoped>

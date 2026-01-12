@@ -193,6 +193,13 @@ types:
                 alert: "AlertConfig"
             location: "packages/core/types/config.ts"
 
+        UIProviderContext:
+            description: "UIProviderのコンテキスト（設定 + Adapter）"
+            properties:
+                config: "UIConfig"
+                adapter: "StyleAdapter"
+            location: "packages/core/types/config.ts"
+
         ButtonConfig:
             properties:
                 default_variant: "ButtonVariant"
@@ -217,6 +224,75 @@ types:
         DEFAULT_UI_CONFIG:
             description: "デフォルトのUI設定値"
             location: "packages/core/types/config.ts"
+
+    # Style Adapter System
+    adapters:
+        StyleAdapter:
+            description: "コンポーネントの状態からスタイルクラスを生成するインターフェース"
+            properties:
+                name: "string"
+                description: "string?"
+                getClasses: "(component: string, state: ComponentState) => string"
+            location: "packages/core/adapters/types.ts"
+
+        StyleAdapterName:
+            values: ["tailwind", "css-variables", "headless"]
+            location: "packages/core/adapters/types.ts"
+
+    # Composable State Types（Headless-First）
+    composables_state:
+        ButtonState:
+            properties:
+                variant: "ButtonVariant"
+                size: "ButtonSize"
+                disabled: "boolean"
+                loading: "boolean"
+            location: "packages/core/types/composables.ts"
+
+        InputState:
+            properties:
+                size: "InputSize"
+                disabled: "boolean"
+                readonly: "boolean"
+                error: "string | undefined"
+            location: "packages/core/types/composables.ts"
+
+        CardState:
+            properties:
+                padding: "CardPadding"
+            location: "packages/core/types/composables.ts"
+
+        CheckboxState:
+            properties:
+                checked: "boolean"
+                disabled: "boolean"
+                indeterminate: "boolean"
+            location: "packages/core/types/composables.ts"
+
+        SwitchState:
+            properties:
+                checked: "boolean"
+                disabled: "boolean"
+            location: "packages/core/types/composables.ts"
+
+        AlertState:
+            properties:
+                variant: "AlertVariant"
+            location: "packages/core/types/composables.ts"
+
+        ComponentState:
+            description: "汎用的なコンポーネント状態"
+            properties:
+                "[key: string]": "unknown"
+            location: "packages/core/types/composables.ts"
+
+        HeadlessComposableReturn:
+            description: "Headless Composableの戻り値型"
+            generic: "T extends ComponentState"
+            properties:
+                state: "Readonly<Ref<T>>"
+                aria_attributes: "Readonly<Ref<Record<string, string | boolean | undefined>>>"
+            location: "packages/core/types/composables.ts"
 
     # Checkbox型
     checkbox:
@@ -561,6 +637,12 @@ composables:
         description: "全体のUI設定を取得する"
         input: "なし"
         output: "Readonly<UIConfig>"
+        location: "packages/core/composables/useUIConfig.ts"
+
+    useStyleAdapter:
+        description: "現在設定されているStyleAdapterを取得する"
+        input: "なし"
+        output: "StyleAdapter"
         location: "packages/core/composables/useUIConfig.ts"
 
     useCheckbox:
@@ -1037,7 +1119,12 @@ nuxt_module:
             properties:
                 prefix: "string?"
                 global: "boolean?"
+                adapter: "StyleAdapterName?"
                 i18n: "{ enabled?: boolean, default_locale?: string }?"
+            location: "packages/nuxt/src/types.ts"
+
+        StyleAdapterName:
+            values: ["tailwind", "css-variables", "headless"]
             location: "packages/nuxt/src/types.ts"
 
     # Nuxt固有の型

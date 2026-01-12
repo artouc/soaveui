@@ -1,6 +1,9 @@
+export type StyleAdapterName = "tailwind" | "css-variables" | "headless"
+
 export interface SoaveNuxtModuleOptions {
     prefix?: string
     global?: boolean
+    adapter?: StyleAdapterName
     i18n?: {
         enabled?: boolean
         default_locale?: string

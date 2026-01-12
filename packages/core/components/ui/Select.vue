@@ -11,13 +11,15 @@ import { SELECT_KEY } from "../../types/select"
 
 interface Props extends SelectProps {
     modelValue?: string
+    class?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: "",
     size: "md" as SelectSize,
     disabled: false,
-    placeholder: "Select..."
+    placeholder: "Select...",
+    unstyled: false
 })
 
 const emit = defineEmits<{

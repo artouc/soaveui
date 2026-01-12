@@ -13,8 +13,10 @@ export interface AlertReturn {
 
 export interface AlertTitleProps {
     class?: string
+    unstyled?: boolean
 }
 
 export interface AlertDescriptionProps {
     class?: string
+    unstyled?: boolean
 }

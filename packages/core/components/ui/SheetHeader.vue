@@ -1,15 +1,22 @@
 <template>
-    <div :class="cn('flex flex-col space-y-2 text-center sm:text-left', props.class)">
+    <div :class="[computed_classes, props.class]">
         <slot />
     </div>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
+import type { SheetHeaderProps } from "../../types/sheet"
 
-export interface Props {
-    class?: string
-}
+const props = withDefaults(defineProps<SheetHeaderProps>(), {
+    unstyled: false
+})
 
-const props = defineProps<Props>()
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("sheet-header", {})
+})
 </script>

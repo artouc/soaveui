@@ -2,6 +2,7 @@ import type { ButtonVariant, ButtonSize } from "./button"
 import type { InputSize } from "./input"
 import type { CardPadding } from "./card"
 import type { AlertVariant } from "./alert"
+import type { StyleAdapter } from "../adapters/types"
 
 /**
  * UIコンポーネントのグローバル設定
@@ -11,6 +12,14 @@ export interface UIConfig {
     input: InputConfig
     card: CardConfig
     alert: AlertConfig
+}
+
+/**
+ * UIProvider のコンテキスト（設定 + Adapter）
+ */
+export interface UIProviderContext {
+    config: UIConfig
+    adapter: StyleAdapter
 }
 
 export interface ButtonConfig {

@@ -1,6 +1,6 @@
 <template>
     <button
-        :class="composable.base_classes.value"
+        :class="[computed_classes, props.class]"
         :disabled="composable.is_disabled.value"
         v-bind="composable.aria_attributes.value"
         @click="handleClick"
@@ -36,20 +36,46 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from "vue"
+import { toRef, computed } from "vue"
 import { useButton } from "../../composables/useButton"
+import { useStyleAdapter, useUI } from "../../composables/useUIConfig"
 import type { ButtonProps } from "../../types/button"
+import type { ButtonState } from "../../types/composables"
 
-const props = withDefaults(defineProps<ButtonProps>(), {
+interface ButtonComponentProps extends ButtonProps {
+    class?: string
+    unstyled?: boolean
+}
+
+const props = withDefaults(defineProps<ButtonComponentProps>(), {
     disabled: false,
-    loading: false
+    loading: false,
+    unstyled: false
 })
 
 const emit = defineEmits<{
     click: [event: MouseEvent]
 }>()
 
+const ui_config = useUI("button")
+const style_adapter = useStyleAdapter()
 const composable = useButton(toRef(() => props))
+
+// StyleAdapterからクラスを取得
+const computed_classes = computed(() => {
+    if (props.unstyled) {
+        return ""
+    }
+
+    const state: ButtonState = {
+        variant: props.variant ?? ui_config.default_variant,
+        size: props.size ?? ui_config.default_size,
+        disabled: composable.is_disabled.value,
+        loading: composable.is_loading.value
+    }
+
+    return style_adapter.getClasses("button", state)
+})
 
 const handleClick = (event: MouseEvent) => {
     if (!composable.is_disabled.value && !composable.is_loading.value) {

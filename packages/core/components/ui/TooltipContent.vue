@@ -6,7 +6,7 @@
             :id="tooltip_id"
             role="tooltip"
             :style="position_styles"
-            :class="cn(base_classes, props.class)"
+            :class="[computed_classes, props.class]"
             @mouseenter="handleContentMouseEnter"
             @mouseleave="handleContentMouseLeave"
         >
@@ -16,15 +16,15 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watchEffect } from "vue"
-import { cn } from "../../utils/cn"
+import { inject, ref, computed, watchEffect } from "vue"
+import { useStyleAdapter } from "../../composables"
 import { TOOLTIP_CONTEXT_KEY } from "./Tooltip.vue"
+import type { TooltipContentProps } from "../../types/tooltip"
+import type { TooltipState } from "../../types/composables"
 
-export interface Props {
-    class?: string
-}
-
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<TooltipContentProps>(), {
+    unstyled: false
+})
 
 const context = inject(TOOLTIP_CONTEXT_KEY)
 
@@ -41,26 +41,29 @@ const {
     handleMouseLeave
 } = context
 
+const style_adapter = useStyleAdapter()
 const content_element = ref<HTMLElement | null>(null)
 
 watchEffect(() => {
     content_ref.value = content_element.value
 })
 
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    const state: TooltipState = {
+        is_open: is_open.value,
+        side: "top"
+    }
+    return style_adapter.getClasses("tooltip", state)
+})
+
 const handleContentMouseEnter = (): void => {
-    // Keep tooltip open when hovering over content
     handleMouseEnter()
 }
 
 const handleContentMouseLeave = (): void => {
     handleMouseLeave()
 }
-
-const base_classes = cn(
-    "z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5",
-    "text-xs text-primary-foreground shadow-md",
-    "animate-in fade-in-0 zoom-in-95"
-)
 </script>
 
 <style scoped>

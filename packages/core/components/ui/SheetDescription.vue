@@ -1,15 +1,22 @@
 <template>
-    <p :class="cn('text-sm text-muted-foreground', props.class)">
+    <p :class="[computed_classes, props.class]">
         <slot />
     </p>
 </template>
 
 <script setup lang="ts">
-import { cn } from "../../utils/cn"
+import { computed } from "vue"
+import { useStyleAdapter } from "../../composables"
+import type { SheetDescriptionProps } from "../../types/sheet"
 
-export interface Props {
-    class?: string
-}
+const props = withDefaults(defineProps<SheetDescriptionProps>(), {
+    unstyled: false
+})
 
-const props = defineProps<Props>()
+const style_adapter = useStyleAdapter()
+
+const computed_classes = computed(() => {
+    if (props.unstyled) return ""
+    return style_adapter.getClasses("sheet-description", {})
+})
 </script>

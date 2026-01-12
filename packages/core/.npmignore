@@ -1,0 +1,15 @@
+# Source files
+src/
+components/
+composables/
+types/
+utils/
+constants/
+
+# Config files
+tsconfig.json
+build.config.ts
+
+# Development
+*.log
+.DS_Store

@@ -3,7 +3,7 @@
 2. 完成したら、npm organization`soave`で公開され、インストール時の名前は`@soave/ui`となる。
 3. ホームページは`https://soave.io`である。
 4. 製作者は`Arata Ouchi (Original SIN Architecture)`である。
-5. ライセンスは`GPL`です。
+5. ライセンスは`MIT`です。
 6. Githubのリポジトリは`artouc/soaveui`です。
 
 # コード規則

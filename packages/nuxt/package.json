@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "Nuxt module for soave UI - Deep Nuxt integration with SSR, i18n, and routing support",
     "author": "Arata Ouchi (Original SIN Architecture)",
-    "license": "GPL-3.0",
+    "license": "MIT",
     "type": "module",
     "exports": {
         ".": {

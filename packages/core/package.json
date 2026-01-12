@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
-    "license": "GPL-3.0",
+    "license": "MIT",
     "homepage": "https://soave.io",
     "repository": {
         "type": "git",

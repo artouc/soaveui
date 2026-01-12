@@ -65,10 +65,10 @@ export function useUI<K extends keyof UIConfig>(component: K): Readonly<UIConfig
         if (import.meta.env.DEV) {
             console.warn(COMPONENT_ERRORS.PROVIDER_NOT_FOUND)
         }
-        return readonly(DEFAULT_UI_CONFIG[component]) as Readonly<UIConfig[K]>
+        return readonly(DEFAULT_UI_CONFIG[component] as object) as Readonly<UIConfig[K]>
     }
 
-    return readonly(context.config[component]) as Readonly<UIConfig[K]>
+    return readonly(context.config[component] as object) as Readonly<UIConfig[K]>
 }
 
 /**

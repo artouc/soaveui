@@ -1,7 +1,7 @@
-import { ref, readonly, type DeepReadonly } from "vue"
-import type { Toast, ToastProps, ToastReturn } from "../types/toast"
+import { ref } from "vue"
+import type { ToastItem, ToastProps, ToastReturn } from "../types/toast"
 
-const toasts = ref<Toast[]>([])
+const toasts = ref<ToastItem[]>([])
 let toast_counter = 0
 
 const generateId = (): string => {
@@ -13,7 +13,7 @@ export function useToast(): ToastReturn {
     const add = (props: ToastProps): string => {
         const id = props.id ?? generateId()
 
-        const toast: Toast = {
+        const toast: ToastItem = {
             id,
             title: props.title,
             description: props.description,
@@ -59,7 +59,7 @@ export function useToast(): ToastReturn {
     }
 
     return {
-        toasts: toasts.value as DeepReadonly<Toast[]>,
+        toasts: [...toasts.value],
         add,
         dismiss,
         dismissAll,

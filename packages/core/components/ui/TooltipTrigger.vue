@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { inject, ref, watchEffect } from "vue"
-import { TOOLTIP_CONTEXT_KEY } from "./Tooltip.vue"
+import { TOOLTIP_CONTEXT_KEY } from "../../types/tooltip"
 
 const context = inject(TOOLTIP_CONTEXT_KEY)
 

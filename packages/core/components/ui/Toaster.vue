@@ -30,7 +30,7 @@ import { computed, ref, watchEffect } from "vue"
 import { useStyleAdapter } from "../../composables"
 import { useToast } from "../../composables/useToast"
 import Toast from "./Toast.vue"
-import type { ToastPosition, Toast as ToastType } from "../../types/toast"
+import type { ToastPosition, ToastItem } from "../../types/toast"
 
 export interface Props {
     position?: ToastPosition
@@ -50,7 +50,7 @@ const props = withDefaults(defineProps<Props>(), {
 const { toasts, dismiss } = useToast()
 const style_adapter = useStyleAdapter()
 
-const internal_toasts = ref<ToastType[]>([])
+const internal_toasts = ref<ToastItem[]>([])
 
 watchEffect(() => {
     internal_toasts.value = [...toasts]

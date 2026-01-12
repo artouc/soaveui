@@ -10,10 +10,10 @@ import { FORM_ERRORS } from "../constants/errors"
 export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> => {
     type FormData = z.infer<T>
 
-    const form_state = reactive<FormState<FormData>>({
+    const form_state = reactive({
         values: {} as FormData,
-        errors: {} as Partial<Record<keyof FormData, string>>,
-        touched: {} as Partial<Record<keyof FormData, boolean>>,
+        errors: {} as Record<string, string | undefined>,
+        touched: {} as Record<string, boolean>,
         is_submitting: false,
         is_dirty: false
     })
@@ -24,11 +24,11 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
     })
 
     const validateField = (field: keyof FormData): void => {
-        form_state.touched[field] = true
+        (form_state.touched as Record<string, boolean>)[field as string] = true
         form_state.is_dirty = true
 
         try {
-            const zod_object = schema as ZodObject<ZodRawShape>
+            const zod_object = schema as unknown as ZodObject<ZodRawShape>
             const field_schema = zod_object.shape[field as string]
 
             if (!field_schema) {
@@ -36,12 +36,12 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
             }
 
             field_schema.parse(form_state.values[field])
-            form_state.errors[field] = undefined
+            ;(form_state.errors as Record<string, string | undefined>)[field as string] = undefined
         } catch (error) {
             if (error instanceof ZodError) {
-                form_state.errors[field] = error.errors[0].message
+                (form_state.errors as Record<string, string | undefined>)[field as string] = error.errors[0].message
             } else if (error instanceof Error) {
-                form_state.errors[field] = error.message
+                (form_state.errors as Record<string, string | undefined>)[field as string] = error.message
             }
         }
     }
@@ -49,15 +49,15 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
     const validateAll = (): boolean => {
         try {
             schema.parse(form_state.values)
-            form_state.errors = {} as Partial<Record<keyof FormData, string>>
+            form_state.errors = {}
             return true
         } catch (error) {
             if (error instanceof ZodError) {
-                form_state.errors = {} as Partial<Record<keyof FormData, string>>
+                form_state.errors = {}
                 error.errors.forEach((err) => {
-                    const field = err.path[0] as keyof FormData
-                    form_state.errors[field] = err.message
-                    form_state.touched[field] = true
+                    const field = err.path[0] as string
+                    ;(form_state.errors as Record<string, string | undefined>)[field] = err.message
+                    ;(form_state.touched as Record<string, boolean>)[field] = true
                 })
             }
             return false
@@ -66,8 +66,8 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
 
     const reset = (): void => {
         form_state.values = {} as FormData
-        form_state.errors = {} as Partial<Record<keyof FormData, string>>
-        form_state.touched = {} as Partial<Record<keyof FormData, boolean>>
+        form_state.errors = {}
+        form_state.touched = {}
         form_state.is_dirty = false
     }
 
@@ -94,8 +94,8 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
         } catch (error) {
             if (error instanceof ZodError) {
                 error.errors.forEach((err) => {
-                    const field = err.path[0] as keyof FormData
-                    form_state.errors[field] = err.message
+                    const field = err.path[0] as string
+                    ;(form_state.errors as Record<string, string | undefined>)[field] = err.message
                 })
             }
             throw error
@@ -182,11 +182,11 @@ export const useForm = <T extends ZodSchema>(schema: T): FormReturn<z.infer<T>> 
 
     return {
         values: form_state.values,
-        errors: readonly(form_state.errors) as FormReturn<FormData>["errors"],
-        touched: readonly(form_state.touched) as FormReturn<FormData>["touched"],
+        errors: readonly(form_state.errors) as Readonly<Partial<Record<keyof FormData, string>>>,
+        touched: readonly(form_state.touched) as Readonly<Partial<Record<keyof FormData, boolean>>>,
         is_valid,
-        is_submitting: readonly(computed(() => form_state.is_submitting)) as FormReturn<FormData>["is_submitting"],
-        is_dirty: readonly(computed(() => form_state.is_dirty)) as FormReturn<FormData>["is_dirty"],
+        is_submitting: computed(() => form_state.is_submitting),
+        is_dirty: computed(() => form_state.is_dirty),
         validateField,
         validateAll,
         reset,

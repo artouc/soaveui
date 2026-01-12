@@ -4,9 +4,16 @@
 import type { Ref } from "vue"
 
 /**
+ * 汎用的なコンポーネント状態（基底型）
+ */
+export interface ComponentState {
+    [key: string]: unknown
+}
+
+/**
  * Button の状態
  */
-export interface ButtonState {
+export interface ButtonState extends ComponentState {
     variant: "primary" | "secondary" | "ghost" | "outline" | "destructive"
     size: "sm" | "md" | "lg"
     disabled: boolean
@@ -16,7 +23,7 @@ export interface ButtonState {
 /**
  * Input の状態
  */
-export interface InputState {
+export interface InputState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     readonly: boolean
@@ -26,21 +33,21 @@ export interface InputState {
 /**
  * Dialog の状態
  */
-export interface DialogState {
+export interface DialogState extends ComponentState {
     is_open: boolean
 }
 
 /**
  * Card の状態
  */
-export interface CardState {
+export interface CardState extends ComponentState {
     padding: "sm" | "md" | "lg" | "none"
 }
 
 /**
  * Checkbox の状態
  */
-export interface CheckboxState {
+export interface CheckboxState extends ComponentState {
     checked: boolean
     disabled: boolean
     indeterminate: boolean
@@ -49,7 +56,7 @@ export interface CheckboxState {
 /**
  * Radio の状態
  */
-export interface RadioState {
+export interface RadioState extends ComponentState {
     checked: boolean
     disabled: boolean
 }
@@ -57,7 +64,7 @@ export interface RadioState {
 /**
  * Switch の状態
  */
-export interface SwitchState {
+export interface SwitchState extends ComponentState {
     checked: boolean
     disabled: boolean
 }
@@ -65,7 +72,7 @@ export interface SwitchState {
 /**
  * Textarea の状態
  */
-export interface TextareaState {
+export interface TextareaState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     readonly: boolean
@@ -75,7 +82,7 @@ export interface TextareaState {
 /**
  * Select の状態
  */
-export interface SelectState {
+export interface SelectState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     is_open: boolean
@@ -84,14 +91,14 @@ export interface SelectState {
 /**
  * Toast の状態
  */
-export interface ToastState {
+export interface ToastState extends ComponentState {
     variant: "default" | "success" | "error" | "warning" | "info"
 }
 
 /**
  * Tooltip の状態
  */
-export interface TooltipState {
+export interface TooltipState extends ComponentState {
     is_open: boolean
     side: "top" | "right" | "bottom" | "left"
 }
@@ -99,21 +106,21 @@ export interface TooltipState {
 /**
  * Popover の状態
  */
-export interface PopoverState {
+export interface PopoverState extends ComponentState {
     is_open: boolean
 }
 
 /**
  * Dropdown の状態
  */
-export interface DropdownState {
+export interface DropdownState extends ComponentState {
     is_open: boolean
 }
 
 /**
  * Sheet の状態
  */
-export interface SheetState {
+export interface SheetState extends ComponentState {
     is_open: boolean
     side: "top" | "right" | "bottom" | "left"
 }
@@ -121,15 +128,8 @@ export interface SheetState {
 /**
  * Alert の状態
  */
-export interface AlertState {
+export interface AlertState extends ComponentState {
     variant: "default" | "info" | "success" | "warning" | "destructive"
-}
-
-/**
- * 汎用的なコンポーネント状態
- */
-export interface ComponentState {
-    [key: string]: unknown
 }
 
 /**

@@ -1,6 +1,9 @@
 import type { ComputedRef, Ref } from "vue"
 
+export type TextareaSize = "sm" | "md" | "lg"
+
 export interface TextareaProps {
+    size?: TextareaSize
     placeholder?: string
     disabled?: boolean
     readonly?: boolean

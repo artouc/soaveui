@@ -18,8 +18,8 @@
 <script setup lang="ts">
 import { inject, ref, computed, watchEffect } from "vue"
 import { useStyleAdapter } from "../../composables"
-import { TOOLTIP_CONTEXT_KEY } from "./Tooltip.vue"
 import type { TooltipContentProps } from "../../types/tooltip"
+import { TOOLTIP_CONTEXT_KEY } from "../../types/tooltip"
 import type { TooltipState } from "../../types/composables"
 
 const props = withDefaults(defineProps<TooltipContentProps>(), {

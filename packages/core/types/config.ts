@@ -8,6 +8,7 @@ import type { StyleAdapter } from "../adapters/types"
  * UIコンポーネントのグローバル設定
  */
 export interface UIConfig {
+    [key: string]: unknown
     button: ButtonConfig
     input: InputConfig
     card: CardConfig

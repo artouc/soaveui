@@ -5,11 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref, toRef, type InjectionKey, type Ref } from "vue"
-import { useTooltip, type UseTooltipReturn } from "../../composables/useTooltip"
+import { provide, ref, type Ref } from "vue"
+import { useTooltip } from "../../composables/useTooltip"
 import type { TooltipSide, TooltipAlign } from "../../types/tooltip"
+import { TOOLTIP_CONTEXT_KEY } from "../../types/tooltip"
 
-export interface Props {
+interface Props {
     side?: TooltipSide
     align?: TooltipAlign
     delay_duration?: number
@@ -25,8 +26,6 @@ const props = withDefaults(defineProps<Props>(), {
     skip_delay_duration: 100,
     disabled: false
 })
-
-export const TOOLTIP_CONTEXT_KEY: InjectionKey<UseTooltipReturn> = Symbol("tooltip-context")
 
 const tooltip_props = ref({
     side: props.side,

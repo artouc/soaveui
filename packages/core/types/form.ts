@@ -1,4 +1,4 @@
-import type { ComputedRef, DeepReadonly } from "vue"
+import type { ComputedRef, Ref } from "vue"
 
 export interface FormState<T> {
     values: T
@@ -42,11 +42,11 @@ export interface FileFieldOptions {
 
 export interface FormReturn<T> {
     values: T
-    errors: DeepReadonly<Partial<Record<keyof T, string>>>
-    touched: DeepReadonly<Partial<Record<keyof T, boolean>>>
+    errors: Readonly<Partial<Record<keyof T, string>>>
+    touched: Readonly<Partial<Record<keyof T, boolean>>>
     is_valid: ComputedRef<boolean>
-    is_submitting: DeepReadonly<ComputedRef<boolean>>
-    is_dirty: DeepReadonly<ComputedRef<boolean>>
+    is_submitting: ComputedRef<boolean>
+    is_dirty: ComputedRef<boolean>
     validateField: (field: keyof T) => void
     validateAll: () => boolean
     reset: () => void

@@ -18,7 +18,7 @@ export interface ToastAction {
     onClick: () => void
 }
 
-export interface Toast extends Required<Pick<ToastProps, "id" | "variant" | "duration" | "dismissible">> {
+export interface ToastItem extends Required<Pick<ToastProps, "id" | "variant" | "duration" | "dismissible">> {
     title?: string
     description?: string
     action?: ToastAction
@@ -32,7 +32,7 @@ export interface ToasterProps {
 }
 
 export interface ToastReturn {
-    toasts: Toast[]
+    toasts: ToastItem[]
     add: (props: ToastProps) => string
     dismiss: (id: string) => void
     dismissAll: () => void

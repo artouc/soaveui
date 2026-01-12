@@ -1,3 +1,6 @@
+import type { InjectionKey } from "vue"
+import type { UseTooltipReturn } from "../composables/useTooltip"
+
 export type TooltipSide = "top" | "right" | "bottom" | "left"
 export type TooltipAlign = "start" | "center" | "end"
 
@@ -34,3 +37,5 @@ export interface TooltipAriaAttributes {
 export interface TooltipTriggerAriaAttributes {
     "aria-describedby": string
 }
+
+export const TOOLTIP_CONTEXT_KEY: InjectionKey<UseTooltipReturn> = Symbol("tooltip-context")

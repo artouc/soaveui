@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { toRef } from "vue"
-import { useCard } from "../../composables/useCard"
+import { useCard } from "../composables/useCard"
 
 const props = withDefaults(defineProps<{
     padding?: "none" | "sm" | "md" | "lg"

@@ -1,6 +1,6 @@
 {
     "name": "@soave/variables",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "CSS Variables styled components for soave UI",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -35,20 +35,22 @@
         "dist"
     ],
     "scripts": {
-        "build": "unbuild",
-        "dev": "unbuild --stub",
+        "build": "vite build",
+        "dev": "vite build --watch",
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@soave/ui": "^0.3.0"
+        "@soave/ui": "^0.4.0"
     },
     "peerDependencies": {
         "vue": "^3.4.0"
     },
     "devDependencies": {
+        "@vitejs/plugin-vue": "^6.0.0",
         "@vue/tsconfig": "^0.5.0",
         "typescript": "^5.4.0",
-        "unbuild": "^2.0.0",
+        "vite": "^6.0.0",
+        "vite-plugin-dts": "^4.3.0",
         "vue": "^3.4.0",
         "vue-tsc": "^2.2.12"
     }

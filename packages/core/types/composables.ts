@@ -66,6 +66,11 @@ export interface RadioItemState extends ComponentState {
 }
 
 /**
+ * Radio の状態（エイリアス）
+ */
+export type RadioState = RadioItemState
+
+/**
  * Switch の状態
  */
 export interface SwitchState extends ComponentState {
@@ -108,6 +113,11 @@ export interface SelectItemState extends ComponentState {
     selected: boolean
     disabled: boolean
 }
+
+/**
+ * Select の状態（エイリアス）
+ */
+export type SelectState = SelectTriggerState
 
 /**
  * FileInput の状態

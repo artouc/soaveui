@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { toRef } from "vue"
-import { useButton } from "../../composables/useButton"
+import { useButton } from "../composables/useButton"
 
 const props = withDefaults(defineProps<{
     variant?: "primary" | "secondary" | "outline" | "ghost" | "destructive"

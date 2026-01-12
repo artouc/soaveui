@@ -1,7 +1,7 @@
 {
     "name": "@soave/ui-monorepo",
     "private": true,
-    "version": "0.3.2",
+    "version": "0.4.0",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -30,13 +30,15 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.0.0",
         "@typescript-eslint/parser": "^8.0.0",
+        "@vitejs/plugin-vue": "^6.0.0",
         "@vue/tsconfig": "^0.5.0",
         "eslint": "^9.0.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-vue": "^9.0.0",
         "prettier": "^3.0.0",
         "typescript": "^5.4.0",
-        "unbuild": "^2.0.0",
+        "vite": "^6.0.0",
+        "vite-plugin-dts": "^4.3.0",
         "vue": "^3.4.0",
         "vue-tsc": "^2.0.0"
     },

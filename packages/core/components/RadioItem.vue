@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { inject, toRef } from "vue"
 import type { Ref, ComputedRef, InjectionKey } from "vue"
-import { useRadioItem } from "../../composables/useRadio"
+import { useRadioItem } from "../composables/useRadio"
 
 interface RadioGroupContext {
     model_value: Ref<string>

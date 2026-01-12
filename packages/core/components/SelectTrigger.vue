@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { ref, inject, onMounted } from "vue"
 import type { Ref, ComputedRef, InjectionKey } from "vue"
-import { useSelectTrigger } from "../../composables/useSelect"
+import { useSelectTrigger } from "../composables/useSelect"
 
 interface SelectContext {
     model_value: Ref<string>

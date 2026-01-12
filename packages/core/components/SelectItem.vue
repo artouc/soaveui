@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { inject, toRef } from "vue"
 import type { Ref, ComputedRef, InjectionKey } from "vue"
-import { useSelectItem } from "../../composables/useSelect"
+import { useSelectItem } from "../composables/useSelect"
 
 interface SelectContext {
     model_value: Ref<string>

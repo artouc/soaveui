@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, provide } from "vue"
 import type { Ref, InjectionKey } from "vue"
-import { useDialog } from "../../composables/useDialog"
+import { useDialog } from "../composables/useDialog"
 
 interface DialogContext {
     is_open: Ref<boolean>

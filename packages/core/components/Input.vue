@@ -15,8 +15,8 @@
 
 <script setup lang="ts">
 import { toRef } from "vue"
-import { useInput } from "../../composables/useInput"
-import type { InputType, InputSize } from "../../types/input"
+import { useInput } from "../composables/useInput"
+import type { InputType, InputSize } from "../types/input"
 
 const props = withDefaults(defineProps<{
     type?: InputType

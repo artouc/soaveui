@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { toRef, computed } from "vue"
-import { useCheckbox } from "../../composables/useCheckbox"
+import { useCheckbox } from "../composables/useCheckbox"
 
 const props = withDefaults(defineProps<{
     size?: "sm" | "md" | "lg"

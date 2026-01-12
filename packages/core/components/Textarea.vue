@@ -15,8 +15,8 @@
 
 <script setup lang="ts">
 import { toRef } from "vue"
-import { useTextarea } from "../../composables/useTextarea"
-import type { TextareaSize, TextareaResize } from "../../types/textarea"
+import { useTextarea } from "../composables/useTextarea"
+import type { TextareaSize, TextareaResize } from "../types/textarea"
 
 const props = withDefaults(defineProps<{
     size?: TextareaSize

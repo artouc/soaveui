@@ -1,6 +1,6 @@
 {
     "name": "@soave/ui",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",

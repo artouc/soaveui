@@ -1,0 +1,127 @@
+/* soave UI - FileInput Styles (BEM) */
+
+.file-input {
+    width: 100%;
+}
+
+.file-input--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Dropzone */
+.file-input__dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-8);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-background);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.file-input__dropzone:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-muted);
+}
+
+.file-input__dropzone--dragging {
+    border-color: var(--color-primary);
+    background-color: hsl(210, 100%, 97%);
+    border-style: solid;
+}
+
+@media (prefers-color-scheme: dark) {
+    .file-input__dropzone--dragging {
+        background-color: hsl(210, 100%, 10%);
+    }
+}
+
+.dark .file-input__dropzone--dragging {
+    background-color: hsl(210, 100%, 10%);
+}
+
+/* Icon */
+.file-input__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--color-muted-foreground);
+}
+
+.file-input__dropzone:hover .file-input__icon,
+.file-input__dropzone--dragging .file-input__icon {
+    color: var(--color-primary);
+}
+
+/* Text */
+.file-input__text {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    text-align: center;
+}
+
+.file-input__dropzone:hover .file-input__text,
+.file-input__dropzone--dragging .file-input__text {
+    color: var(--color-foreground);
+}
+
+/* File List */
+.file-input__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+.file-input__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background-color: var(--color-muted);
+    font-size: var(--font-size-sm);
+}
+
+.file-input__item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-input__item-size {
+    color: var(--color-muted-foreground);
+    margin-left: var(--space-2);
+}
+
+.file-input__item-remove {
+    padding: var(--space-1);
+    margin-left: var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.file-input__item-remove:hover {
+    color: var(--color-destructive);
+    background-color: var(--color-destructive);
+    background-color: hsl(0, 84%, 95%);
+}
+
+@media (prefers-color-scheme: dark) {
+    .file-input__item-remove:hover {
+        background-color: hsl(0, 84%, 15%);
+    }
+}
+
+.dark .file-input__item-remove:hover {
+    background-color: hsl(0, 84%, 15%);
+}

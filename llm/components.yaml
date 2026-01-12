@@ -1,0 +1,94 @@
+# @soave/ui コンポーネント一覧
+
+Button:
+  - Button
+
+Input:
+  - Input
+  - Textarea
+
+Card:
+  - Card
+  - CardHeader
+  - CardTitle
+  - CardDescription
+  - CardContent
+  - CardFooter
+
+Alert:
+  - Alert
+  - AlertTitle
+  - AlertDescription
+
+Checkbox:
+  - Checkbox
+
+Switch:
+  - Switch
+
+Dialog:
+  - Dialog
+  - DialogTrigger
+  - DialogOverlay
+  - DialogContent
+  - DialogHeader
+  - DialogTitle
+  - DialogDescription
+  - DialogFooter
+
+Select:
+  - Select
+  - SelectTrigger
+  - SelectValue
+  - SelectContent
+  - SelectItem
+
+Radio:
+  - RadioGroup
+  - RadioItem
+
+Form:
+  - FormField
+  - FormLabel
+  - FormInput
+  - FormTextarea
+  - FormError
+
+FileInput:
+  - FileInput
+
+Sheet:
+  - Sheet
+  - SheetTrigger
+  - SheetOverlay
+  - SheetContent
+  - SheetHeader
+  - SheetTitle
+  - SheetDescription
+  - SheetFooter
+  - SheetClose
+
+Popover:
+  - Popover
+  - PopoverTrigger
+  - PopoverContent
+
+Tooltip:
+  - Tooltip
+  - TooltipTrigger
+  - TooltipContent
+
+DropdownMenu:
+  - DropdownMenu
+  - DropdownMenuTrigger
+  - DropdownMenuContent
+  - DropdownMenuItem
+  - DropdownMenuSeparator
+  - DropdownMenuLabel
+
+Toast:
+  - Toast
+  - ToastTitle
+  - ToastDescription
+  - ToastClose
+  - Toaster

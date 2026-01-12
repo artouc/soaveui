@@ -1,6 +1,6 @@
 {
     "name": "@soave/variables",
-    "version": "0.3.2",
+    "version": "0.5.0",
     "description": "CSS Variables styled components for soave UI",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -22,7 +22,21 @@
         "./styles/tokens.css": "./dist/styles/tokens.css",
         "./styles/button.css": "./dist/styles/button.css",
         "./styles/input.css": "./dist/styles/input.css",
-        "./styles/card.css": "./dist/styles/card.css"
+        "./styles/textarea.css": "./dist/styles/textarea.css",
+        "./styles/card.css": "./dist/styles/card.css",
+        "./styles/alert.css": "./dist/styles/alert.css",
+        "./styles/checkbox.css": "./dist/styles/checkbox.css",
+        "./styles/switch.css": "./dist/styles/switch.css",
+        "./styles/dialog.css": "./dist/styles/dialog.css",
+        "./styles/select.css": "./dist/styles/select.css",
+        "./styles/radio.css": "./dist/styles/radio.css",
+        "./styles/form.css": "./dist/styles/form.css",
+        "./styles/file-input.css": "./dist/styles/file-input.css",
+        "./styles/sheet.css": "./dist/styles/sheet.css",
+        "./styles/popover.css": "./dist/styles/popover.css",
+        "./styles/tooltip.css": "./dist/styles/tooltip.css",
+        "./styles/dropdown.css": "./dist/styles/dropdown.css",
+        "./styles/toast.css": "./dist/styles/toast.css"
     },
     "files": [
         "dist"

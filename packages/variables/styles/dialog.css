@@ -1,0 +1,120 @@
+/* soave UI - Dialog Styles (BEM) */
+
+/* Overlay */
+.dialog__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background-color: rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(4px);
+    animation: dialog-overlay-fade-in var(--transition-normal);
+}
+
+@keyframes dialog-overlay-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Content */
+.dialog__content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 50;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: 32rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    animation: dialog-content-fade-in var(--transition-normal);
+}
+
+@keyframes dialog-content-fade-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Header */
+.dialog__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
+}
+
+@media (min-width: 640px) {
+    .dialog__header {
+        text-align: left;
+    }
+}
+
+/* Title */
+.dialog__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+/* Description */
+.dialog__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+}
+
+/* Footer */
+.dialog__footer {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+    .dialog__footer {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
+/* Close Button */
+.dialog__close {
+    position: absolute;
+    right: var(--space-4);
+    top: var(--space-4);
+    border-radius: var(--radius-sm);
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+    padding: var(--space-1);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.dialog__close:hover {
+    opacity: 1;
+}
+
+.dialog__close:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}

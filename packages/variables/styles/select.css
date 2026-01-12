@@ -1,0 +1,124 @@
+/* soave UI - Select Styles (BEM) */
+
+/* Trigger */
+.select__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-input);
+    background-color: var(--color-background);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.select__trigger:focus-visible {
+    outline: none;
+    border-color: var(--color-ring);
+    box-shadow: 0 0 0 2px var(--color-ring);
+}
+
+.select__trigger:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: var(--color-muted);
+}
+
+.select__trigger[aria-expanded="true"] {
+    border-color: var(--color-ring);
+}
+
+/* Chevron */
+.select__chevron {
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.5;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.select__trigger[aria-expanded="true"] .select__chevron {
+    transform: rotate(180deg);
+}
+
+/* Value */
+.select__value {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select__value:empty::before {
+    content: attr(data-placeholder);
+    color: var(--color-muted-foreground);
+}
+
+/* Content */
+.select__content {
+    position: absolute;
+    z-index: 50;
+    min-width: 8rem;
+    width: var(--trigger-width, 100%);
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    padding: var(--space-1);
+    box-shadow: var(--shadow-md);
+    animation: select-content-fade-in var(--transition-fast);
+}
+
+@keyframes select-content-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Item */
+.select__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    outline: none;
+    transition: background-color var(--transition-fast);
+}
+
+.select__item:hover:not(.select__item--disabled) {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.select__item:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.select__item--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.select__item[data-selected="true"] {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+}
+
+.select__item[data-selected="true"]:hover {
+    opacity: 0.9;
+}

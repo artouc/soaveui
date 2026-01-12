@@ -1,0 +1,99 @@
+/* soave UI - DropdownMenu Styles (BEM) */
+
+/* Content */
+.dropdown__content {
+    z-index: 50;
+    min-width: 8rem;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+    padding: var(--space-1);
+    box-shadow: var(--shadow-md);
+    animation: dropdown-fade-in var(--transition-fast);
+}
+
+@keyframes dropdown-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Item */
+.dropdown__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    outline: none;
+    transition: background-color var(--transition-fast);
+    border: none;
+    background: transparent;
+    text-align: left;
+    color: var(--color-foreground);
+}
+
+.dropdown__item:hover:not(.dropdown__item--disabled) {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.dropdown__item:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.dropdown__item--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dropdown__item--destructive {
+    color: var(--color-destructive);
+}
+
+.dropdown__item--destructive:hover:not(.dropdown__item--disabled) {
+    background-color: var(--color-destructive);
+    color: var(--color-destructive-foreground);
+}
+
+/* Separator */
+.dropdown__separator {
+    height: 1px;
+    margin: var(--space-1) calc(var(--space-1) * -1);
+    background-color: var(--color-border);
+}
+
+/* Label */
+.dropdown__label {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-muted-foreground);
+}
+
+/* Icon slot */
+.dropdown__item-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+/* Shortcut */
+.dropdown__shortcut {
+    margin-left: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    letter-spacing: 0.1em;
+}

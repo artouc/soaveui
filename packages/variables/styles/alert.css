@@ -1,0 +1,111 @@
+/* soave UI - Alert Styles (BEM) */
+
+.alert {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+/* Variants */
+.alert--default {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border-color: var(--color-border);
+}
+
+.alert--info {
+    background-color: hsl(210, 100%, 97%);
+    color: hsl(210, 100%, 30%);
+    border-color: hsl(210, 100%, 80%);
+}
+
+.alert--success {
+    background-color: hsl(142, 76%, 96%);
+    color: hsl(142, 76%, 26%);
+    border-color: hsl(142, 76%, 70%);
+}
+
+.alert--warning {
+    background-color: hsl(48, 100%, 96%);
+    color: hsl(48, 100%, 20%);
+    border-color: hsl(48, 100%, 60%);
+}
+
+.alert--destructive {
+    background-color: hsl(0, 84%, 97%);
+    color: var(--color-destructive);
+    border-color: var(--color-destructive);
+}
+
+/* Dark mode variants */
+@media (prefers-color-scheme: dark) {
+    .alert--info {
+        background-color: hsl(210, 100%, 10%);
+        color: hsl(210, 100%, 80%);
+        border-color: hsl(210, 100%, 30%);
+    }
+
+    .alert--success {
+        background-color: hsl(142, 76%, 10%);
+        color: hsl(142, 76%, 70%);
+        border-color: hsl(142, 76%, 30%);
+    }
+
+    .alert--warning {
+        background-color: hsl(48, 100%, 10%);
+        color: hsl(48, 100%, 70%);
+        border-color: hsl(48, 100%, 30%);
+    }
+
+    .alert--destructive {
+        background-color: hsl(0, 84%, 10%);
+        color: hsl(0, 84%, 70%);
+        border-color: hsl(0, 84%, 30%);
+    }
+}
+
+.dark .alert--info {
+    background-color: hsl(210, 100%, 10%);
+    color: hsl(210, 100%, 80%);
+    border-color: hsl(210, 100%, 30%);
+}
+
+.dark .alert--success {
+    background-color: hsl(142, 76%, 10%);
+    color: hsl(142, 76%, 70%);
+    border-color: hsl(142, 76%, 30%);
+}
+
+.dark .alert--warning {
+    background-color: hsl(48, 100%, 10%);
+    color: hsl(48, 100%, 70%);
+    border-color: hsl(48, 100%, 30%);
+}
+
+.dark .alert--destructive {
+    background-color: hsl(0, 84%, 10%);
+    color: hsl(0, 84%, 70%);
+    border-color: hsl(0, 84%, 30%);
+}
+
+/* Alert Title */
+.alert__title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+/* Alert Description */
+.alert__description {
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.9;
+}

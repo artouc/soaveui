@@ -1,4 +1,4 @@
-# Vue UI Composer アーキテクチャ仕様書
+# soave UI アーキテクチャ仕様書
 
 **Version**: 1.0.0  
 **Last Updated**: 2026年1月12日  
@@ -22,7 +22,7 @@
 
 ### ビジョン
 
-**Vue UI Composer** は、shadcn/ui を超える Vue.js/Nuxt.js 専用の次世代 UI フレームワークです。「人間 + LLM + Nuxt」が一体となって扱えるコンポーネントシステムを提供し、アクセシビリティ・型安全性・AI フレンドリーな設計を実現します。
+**soave UI** は、shadcn/ui を超える Vue.js/Nuxt.js 専用の次世代 UI フレームワークです。「人間 + LLM + Nuxt」が一体となって扱えるコンポーネントシステムを提供し、アクセシビリティ・型安全性・AI フレンドリーな設計を実現します。
 
 ### 設計哲学
 
@@ -38,7 +38,7 @@
 
 ### なぜ shadcn/ui を超えられるか
 
-| 特性 | shadcn/ui | Vue UI Composer |
+| 特性 | shadcn/ui | soave UI |
 |------|-----------|-----------------|
 | **Composable の深さ** | × (React Hooks) | ⭐⭐⭐⭐⭐ (Vue 3 本来の力) |
 | **フレームワーク統合** | × (汎用) | ⭐⭐⭐⭐⭐ (Nuxt 専用最適化) |
@@ -1019,7 +1019,7 @@ const handleSubmit = () => {
 
 ### 機能比較表
 
-| 特性 | shadcn/ui | Vue UI Composer |
+| 特性 | shadcn/ui | soave UI |
 |------|-----------|-----------------|
 | **フレームワーク** | React | Vue 3 / Nuxt 3 |
 | **コード所有** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
@@ -1043,7 +1043,7 @@ const handleSubmit = () => {
 
 ## まとめ
 
-Vue UI Composer は、shadcn/ui の「コード所有」「LLM フレンドリー」という強みを継承しつつ、Vue 3 Composition API と Nuxt 3 の特性を最大限活かした次世代 UI フレームワークです。
+soave UI は、shadcn/ui の「コード所有」「LLM フレンドリー」という強みを継承しつつ、Vue 3 Composition API と Nuxt 3 の特性を最大限活かした次世代 UI フレームワークです。
 
 - **Composable-First** で、ロジックとUIを完全分離
 - **Provider Pattern** で、UI 設定を一元管理

@@ -33,7 +33,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/soave-io/ui"
+        "url": "https://github.com/artouc/soaveui"
     },
     "homepage": "https://soave.io",
     "dependencies": {

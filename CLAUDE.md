@@ -4,6 +4,7 @@
 3. ホームページは`https://soave.io`である。
 4. 製作者は`Arata Ouchi (Original SIN Architecture)`である。
 5. ライセンスは`GPL`です。
+6. Githubのリポジトリは`artouc/soaveui`です。
 
 # コード規則
 1. 変数名は`snake_case`、関数名は`camelCase`、型名は`PascalCase`、環境変数は`CONTACT_CASE`

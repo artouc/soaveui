@@ -7,7 +7,7 @@
     "homepage": "https://soave.io",
     "repository": {
         "type": "git",
-        "url": "https://github.com/soave/ui"
+        "url": "https://github.com/artouc/soaveui"
     },
     "type": "module",
     "main": "./dist/index.mjs",

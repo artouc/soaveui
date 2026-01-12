@@ -6,6 +6,10 @@
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "GPL-3.0",
     "homepage": "https://soave.io",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/artouc/soaveui"
+    },
     "workspaces": [
         "packages/*"
     ],

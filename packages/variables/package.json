@@ -1,6 +1,6 @@
 {
     "name": "@soave/variables",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "CSS Variables styled components for soave UI",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -18,17 +18,25 @@
             "import": "./dist/index.mjs",
             "types": "./dist/index.d.ts"
         },
-        "./components/*": {
-            "import": "./dist/components/*.mjs",
-            "types": "./dist/components/*.d.ts"
-        },
-        "./styles/*": {
-            "import": "./dist/styles/*.css",
-            "default": "./dist/styles/*.css"
+        "./styles/index.css": {
+            "import": "./dist/styles/index.css",
+            "default": "./dist/styles/index.css"
         },
         "./styles/tokens.css": {
             "import": "./dist/styles/tokens.css",
             "default": "./dist/styles/tokens.css"
+        },
+        "./styles/button.css": {
+            "import": "./dist/styles/button.css",
+            "default": "./dist/styles/button.css"
+        },
+        "./styles/input.css": {
+            "import": "./dist/styles/input.css",
+            "default": "./dist/styles/input.css"
+        },
+        "./styles/card.css": {
+            "import": "./dist/styles/card.css",
+            "default": "./dist/styles/card.css"
         }
     },
     "files": [

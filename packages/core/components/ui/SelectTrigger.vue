@@ -1,5 +1,6 @@
 <template>
     <button
+        ref="button_ref"
         type="button"
         :class="composable.base_classes.value"
         :disabled="composable.is_disabled.value"
@@ -24,13 +25,22 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from "vue"
+import { inject, ref, onMounted, onUnmounted } from "vue"
 import { useSelectTrigger } from "../../composables/useSelect"
 import type { SelectContext } from "../../types/select"
 import { SELECT_KEY } from "../../types/select"
 
 const context = inject<SelectContext>(SELECT_KEY)
 const composable = useSelectTrigger()
+const button_ref = ref<HTMLButtonElement | null>(null)
+
+onMounted(() => {
+    context?.setTriggerRef(button_ref.value)
+})
+
+onUnmounted(() => {
+    context?.setTriggerRef(null)
+})
 
 const handleClick = () => {
     context?.toggle()

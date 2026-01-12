@@ -25,6 +25,7 @@ const emit = defineEmits<{
 }>()
 
 const is_open = ref(false)
+const trigger_ref = ref<HTMLElement | null>(null)
 
 const context: SelectContext = {
     model_value: toRef(() => props.modelValue),
@@ -32,6 +33,7 @@ const context: SelectContext = {
     disabled: toRef(() => props.disabled),
     size: toRef(() => props.size ?? "md"),
     placeholder: toRef(() => props.placeholder ?? "Select..."),
+    trigger_ref,
     updateValue: (value: string) => {
         emit("update:modelValue", value)
         is_open.value = false
@@ -48,6 +50,9 @@ const context: SelectContext = {
         if (!props.disabled) {
             is_open.value = !is_open.value
         }
+    },
+    setTriggerRef: (element: HTMLElement | null) => {
+        trigger_ref.value = element
     }
 }
 

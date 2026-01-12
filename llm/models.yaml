@@ -1,7 +1,7 @@
 # soave UI データモデル定義
 # CLAUDE.md規則: 全てのデータモデルを記載
 
-version: "0.1.0"
+version: "0.1.1"
 last_updated: "2026-01-12"
 
 # =============================================================================
@@ -334,10 +334,12 @@ types:
                 disabled: "Ref<boolean>"
                 size: "Ref<SelectSize>"
                 placeholder: "Ref<string>"
+                trigger_ref: "Ref<HTMLElement | null>"
                 updateValue: "(value: string) => void"
                 open: "() => void"
                 close: "() => void"
                 toggle: "() => void"
+                setTriggerRef: "(element: HTMLElement | null) => void"
             location: "packages/core/types/select.ts"
 
     # FileInput型
@@ -1026,7 +1028,7 @@ constants:
 
 nuxt_module:
     package_name: "@soave/nuxt-ui"
-    version: "0.1.0"
+    version: "0.1.1"
     location: "packages/nuxt"
 
     # モジュールオプション

@@ -20,10 +20,12 @@ export interface SelectContext {
     disabled: Ref<boolean>
     size: Ref<SelectSize>
     placeholder: Ref<string>
+    trigger_ref: Ref<HTMLElement | null>
     updateValue: (value: string) => void
     open: () => void
     close: () => void
     toggle: () => void
+    setTriggerRef: (element: HTMLElement | null) => void
 }
 
 export const SELECT_KEY: InjectionKey<SelectContext> = Symbol("select")

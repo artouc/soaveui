@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { inject, ref, watchEffect } from "vue"
-import { POPOVER_CONTEXT_KEY } from "./Popover.vue"
+import { POPOVER_CONTEXT_KEY } from "../../types/popover"
 
 const context = inject(POPOVER_CONTEXT_KEY)
 

@@ -1,3 +1,6 @@
+import type { InjectionKey } from "vue"
+import type { UseDropdownReturn } from "../composables/useDropdown"
+
 export type DropdownSide = "top" | "right" | "bottom" | "left"
 export type DropdownAlign = "start" | "center" | "end"
 
@@ -38,3 +41,5 @@ export interface DropdownItemContext {
     is_active: boolean
     is_disabled: boolean
 }
+
+export const DROPDOWN_CONTEXT_KEY: InjectionKey<UseDropdownReturn> = Symbol("dropdown-context")

@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { inject, ref, watchEffect } from "vue"
-import { DROPDOWN_CONTEXT_KEY } from "./DropdownMenu.vue"
+import { DROPDOWN_CONTEXT_KEY } from "../../types/dropdown"
 
 const context = inject(DROPDOWN_CONTEXT_KEY)
 

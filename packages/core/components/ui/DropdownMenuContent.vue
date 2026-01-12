@@ -19,8 +19,8 @@
 <script setup lang="ts">
 import { inject, ref, computed, watchEffect, nextTick, watch } from "vue"
 import { useStyleAdapter } from "../../composables"
-import { DROPDOWN_CONTEXT_KEY } from "./DropdownMenu.vue"
 import type { DropdownContentProps } from "../../types/dropdown"
+import { DROPDOWN_CONTEXT_KEY } from "../../types/dropdown"
 import type { DropdownState } from "../../types/composables"
 
 const props = withDefaults(defineProps<DropdownContentProps>(), {

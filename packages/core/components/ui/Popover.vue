@@ -5,11 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref, type InjectionKey, type Ref } from "vue"
-import { usePopover, type UsePopoverReturn } from "../../composables/usePopover"
+import { provide, ref, type Ref } from "vue"
+import { usePopover } from "../../composables/usePopover"
 import type { PopoverSide, PopoverAlign } from "../../types/popover"
+import { POPOVER_CONTEXT_KEY } from "../../types/popover"
 
-export interface Props {
+interface Props {
     side?: PopoverSide
     align?: PopoverAlign
     modal?: boolean
@@ -21,8 +22,6 @@ const props = withDefaults(defineProps<Props>(), {
     align: "center",
     modal: false
 })
-
-export const POPOVER_CONTEXT_KEY: InjectionKey<UsePopoverReturn> = Symbol("popover-context")
 
 const popover_props = ref({
     side: props.side,

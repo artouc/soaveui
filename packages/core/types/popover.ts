@@ -1,3 +1,6 @@
+import type { InjectionKey } from "vue"
+import type { UsePopoverReturn } from "../composables/usePopover"
+
 export type PopoverSide = "top" | "right" | "bottom" | "left"
 export type PopoverAlign = "start" | "center" | "end"
 
@@ -22,3 +25,5 @@ export interface PopoverContext {
     close: () => void
     toggle: () => void
 }
+
+export const POPOVER_CONTEXT_KEY: InjectionKey<UsePopoverReturn> = Symbol("popover-context")

@@ -48,9 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, provide, onMounted, onUnmounted, type InjectionKey } from "vue"
+import { ref, computed, watch, provide, onMounted, onUnmounted } from "vue"
 import { useStyleAdapter } from "../../composables"
 import type { SheetSide, SheetContext, SheetProps } from "../../types/sheet"
+import { SHEET_CONTEXT_KEY } from "../../types/sheet"
 import type { SheetState } from "../../types/composables"
 
 interface Props extends SheetProps {}
@@ -66,7 +67,6 @@ const emit = defineEmits<{
     "update:open": [value: boolean]
 }>()
 
-export const SHEET_CONTEXT_KEY: InjectionKey<SheetContext> = Symbol("sheet-context")
 
 const style_adapter = useStyleAdapter()
 const is_open = ref(props.open)

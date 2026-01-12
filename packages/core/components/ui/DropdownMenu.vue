@@ -5,11 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { provide, ref, type InjectionKey, type Ref } from "vue"
-import { useDropdown, type UseDropdownReturn } from "../../composables/useDropdown"
+import { provide, ref, type Ref } from "vue"
+import { useDropdown } from "../../composables/useDropdown"
 import type { DropdownSide, DropdownAlign } from "../../types/dropdown"
+import { DROPDOWN_CONTEXT_KEY } from "../../types/dropdown"
 
-export interface Props {
+interface Props {
     side?: DropdownSide
     align?: DropdownAlign
     class?: string
@@ -19,8 +20,6 @@ const props = withDefaults(defineProps<Props>(), {
     side: "bottom",
     align: "start"
 })
-
-export const DROPDOWN_CONTEXT_KEY: InjectionKey<UseDropdownReturn> = Symbol("dropdown-context")
 
 const dropdown_props = ref({
     side: props.side,

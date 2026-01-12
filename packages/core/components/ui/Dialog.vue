@@ -44,9 +44,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, type InjectionKey } from "vue"
+import { computed, provide } from "vue"
 import { useStyleAdapter } from "../../composables"
 import type { DialogProps } from "../../types/dialog"
+import { DIALOG_KEY } from "../../types/dialog"
 import type { DialogState } from "../../types/composables"
 
 interface DialogComponentProps extends DialogProps {
@@ -101,13 +102,7 @@ const handleOverlayClick = () => {
     }
 }
 
-export interface DialogContext {
-    close: () => void
-}
-
-export const DialogKey: InjectionKey<DialogContext> = Symbol("dialog")
-
-provide(DialogKey, { close })
+provide(DIALOG_KEY, { close })
 </script>
 
 <style scoped>

@@ -18,8 +18,8 @@
 <script setup lang="ts">
 import { inject, computed, onMounted } from "vue"
 import { useStyleAdapter } from "../../composables"
-import { DROPDOWN_CONTEXT_KEY } from "./DropdownMenu.vue"
 import type { DropdownItemProps } from "../../types/dropdown"
+import { DROPDOWN_CONTEXT_KEY } from "../../types/dropdown"
 
 const props = withDefaults(defineProps<DropdownItemProps>(), {
     disabled: false,

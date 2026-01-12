@@ -18,8 +18,8 @@
 <script setup lang="ts">
 import { inject, ref, computed, watchEffect, onMounted } from "vue"
 import { useStyleAdapter } from "../../composables"
-import { POPOVER_CONTEXT_KEY } from "./Popover.vue"
 import type { PopoverContentProps } from "../../types/popover"
+import { POPOVER_CONTEXT_KEY } from "../../types/popover"
 import type { PopoverState } from "../../types/composables"
 
 const props = withDefaults(defineProps<PopoverContentProps>(), {

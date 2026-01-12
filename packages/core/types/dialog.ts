@@ -1,4 +1,10 @@
-import type { Ref, DeepReadonly } from "vue"
+import type { Ref, DeepReadonly, InjectionKey } from "vue"
+
+export interface DialogContext {
+    close: () => void
+}
+
+export const DIALOG_KEY: InjectionKey<DialogContext> = Symbol("dialog")
 
 export interface DialogProps {
     open?: boolean

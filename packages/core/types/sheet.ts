@@ -1,3 +1,5 @@
+import type { InjectionKey } from "vue"
+
 export type SheetSide = "top" | "right" | "bottom" | "left"
 
 export interface SheetProps {
@@ -34,3 +36,5 @@ export interface SheetContext {
     open: () => void
     close: () => void
 }
+
+export const SHEET_CONTEXT_KEY: InjectionKey<SheetContext> = Symbol("sheet-context")

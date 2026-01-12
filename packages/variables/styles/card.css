@@ -1,0 +1,65 @@
+/* soave UI - Card Styles (BEM) */
+
+.card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    color: var(--color-card-foreground);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Padding Variants */
+.card--none {
+    padding: 0;
+}
+
+.card--sm {
+    padding: var(--space-4);
+}
+
+.card--md {
+    padding: var(--space-6);
+}
+
+.card--lg {
+    padding: var(--space-8);
+}
+
+/* Card Header */
+.card__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-6);
+    padding-bottom: 0;
+}
+
+/* Card Title */
+.card__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+/* Card Description */
+.card__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+}
+
+/* Card Content */
+.card__content {
+    padding: var(--space-6);
+    padding-top: 0;
+}
+
+/* Card Footer */
+.card__footer {
+    display: flex;
+    align-items: center;
+    padding: var(--space-6);
+    padding-top: 0;
+}

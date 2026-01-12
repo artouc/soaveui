@@ -1,7 +1,7 @@
 {
     "name": "@soave/ui-monorepo",
     "private": true,
-    "version": "0.1.1",
+    "version": "0.3.0",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -14,8 +14,10 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "npm run build -w @soave/ui && npm run build -w @soave/nuxt-ui",
+        "build": "npm run build -w @soave/ui && npm run build -w @soave/tailwind && npm run build -w @soave/variables && npm run build -w @soave/nuxt-ui",
         "build:core": "npm run build -w @soave/ui",
+        "build:tailwind": "npm run build -w @soave/tailwind",
+        "build:variables": "npm run build -w @soave/variables",
         "build:nuxt": "npm run build -w @soave/nuxt-ui",
         "dev": "npm run dev -w @soave/ui",
         "dev:nuxt": "npm run dev -w @soave/nuxt-ui",

@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue"
+import type { ComputedRef, Ref, DeepReadonly } from "vue"
 
 export interface FileInputProps {
     accept?: string
@@ -16,19 +16,30 @@ export interface FileInfo {
     preview_url: string | null
 }
 
+/**
+ * ファイル入力の状態（StyleAdapterに渡す用）
+ */
+export interface FileInputState {
+    disabled: boolean
+    is_dragging: boolean
+    has_error: boolean
+    has_files: boolean
+}
+
 export interface FileInputAriaAttributes {
     "aria-disabled"?: boolean
     "aria-invalid"?: boolean
 }
 
+/**
+ * useFileInput の戻り値（ヘッドレス - スタイル情報なし）
+ */
 export interface FileInputReturn {
-    base_classes: ComputedRef<string>
-    dropzone_classes: ComputedRef<string>
-    is_disabled: ComputedRef<boolean>
+    state: DeepReadonly<ComputedRef<FileInputState>>
     is_dragging: Ref<boolean>
     files: Ref<FileInfo[]>
     error: Ref<string | null>
-    aria_attributes: ComputedRef<FileInputAriaAttributes>
+    aria_attributes: DeepReadonly<ComputedRef<FileInputAriaAttributes>>
     handleFiles: (file_list: FileList | null) => void
     handleDragEnter: (event: DragEvent) => void
     handleDragLeave: (event: DragEvent) => void

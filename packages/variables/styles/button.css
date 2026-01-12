@@ -1,0 +1,96 @@
+/* soave UI - Button Styles (BEM) */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Variants */
+.button--primary {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+}
+
+.button--primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.button--primary:active:not(:disabled) {
+    opacity: 0.8;
+}
+
+.button--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-secondary-foreground);
+}
+
+.button--secondary:hover:not(:disabled) {
+    opacity: 0.8;
+}
+
+.button--ghost {
+    background-color: transparent;
+    color: var(--color-foreground);
+}
+
+.button--ghost:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.button--outline {
+    background-color: transparent;
+    border: 1px solid var(--color-input);
+    color: var(--color-foreground);
+}
+
+.button--outline:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+}
+
+.button--destructive {
+    background-color: var(--color-destructive);
+    color: var(--color-destructive-foreground);
+}
+
+.button--destructive:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+/* Sizes */
+.button--sm {
+    height: 2.25rem;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+}
+
+.button--md {
+    height: 2.5rem;
+    padding: var(--space-2) var(--space-4);
+}
+
+.button--lg {
+    height: 2.75rem;
+    padding: var(--space-3) var(--space-8);
+}

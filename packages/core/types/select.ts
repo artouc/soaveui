@@ -1,4 +1,4 @@
-import type { ComputedRef, InjectionKey, Ref } from "vue"
+import type { ComputedRef, InjectionKey, Ref, DeepReadonly } from "vue"
 
 export type SelectSize = "sm" | "md" | "lg"
 
@@ -53,17 +53,38 @@ export interface SelectContext {
 
 export const SELECT_KEY: InjectionKey<SelectContext> = Symbol("select")
 
+/**
+ * セレクトトリガーの状態（StyleAdapterに渡す用）
+ */
+export interface SelectTriggerState {
+    size: SelectSize
+    disabled: boolean
+    is_open: boolean
+}
+
+/**
+ * セレクトコンテンツの状態（StyleAdapterに渡す用）
+ */
+export interface SelectContentState {
+    is_open: boolean
+}
+
+/**
+ * セレクトアイテムの状態（StyleAdapterに渡す用）
+ */
+export interface SelectItemState {
+    selected: boolean
+    disabled: boolean
+}
+
 export interface SelectTriggerReturn {
-    base_classes: ComputedRef<string>
-    is_disabled: ComputedRef<boolean>
+    state: DeepReadonly<ComputedRef<SelectTriggerState>>
 }
 
 export interface SelectContentReturn {
-    base_classes: ComputedRef<string>
+    state: DeepReadonly<ComputedRef<SelectContentState>>
 }
 
 export interface SelectItemReturn {
-    base_classes: ComputedRef<string>
-    is_selected: ComputedRef<boolean>
-    is_disabled: ComputedRef<boolean>
+    state: DeepReadonly<ComputedRef<SelectItemState>>
 }

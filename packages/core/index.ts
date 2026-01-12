@@ -1,8 +1,8 @@
 // Composables
 export * from "./composables"
 
-// Components
-export * from "./components/ui"
+// Components (Headless)
+export * from "./components"
 
 // Types
 export * from "./types"

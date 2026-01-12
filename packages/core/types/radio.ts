@@ -1,4 +1,4 @@
-import type { ComputedRef, InjectionKey, Ref } from "vue"
+import type { ComputedRef, InjectionKey, Ref, DeepReadonly } from "vue"
 
 export type RadioSize = "sm" | "md" | "lg"
 
@@ -25,16 +25,25 @@ export interface RadioGroupContext {
 
 export const RADIO_GROUP_KEY: InjectionKey<RadioGroupContext> = Symbol("radio-group")
 
+/**
+ * ラジオボタンの状態（StyleAdapterに渡す用）
+ */
+export interface RadioItemState {
+    size: RadioSize
+    disabled: boolean
+    checked: boolean
+}
+
 export interface RadioAriaAttributes {
     role: "radio"
     "aria-checked": boolean
     "aria-disabled"?: boolean
 }
 
+/**
+ * useRadioItem の戻り値（ヘッドレス - スタイル情報なし）
+ */
 export interface RadioItemReturn {
-    base_classes: ComputedRef<string>
-    indicator_classes: ComputedRef<string>
-    is_checked: ComputedRef<boolean>
-    is_disabled: ComputedRef<boolean>
-    aria_attributes: ComputedRef<RadioAriaAttributes>
+    state: DeepReadonly<ComputedRef<RadioItemState>>
+    aria_attributes: DeepReadonly<ComputedRef<RadioAriaAttributes>>
 }

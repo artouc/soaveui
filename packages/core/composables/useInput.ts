@@ -1,48 +1,29 @@
-import { computed, ref, type Ref } from "vue"
-import { cn } from "../utils/cn"
-import type { InputProps, InputReturn, InputAriaAttributes } from "../types/input"
+import { computed, ref, readonly, type Ref } from "vue"
+import type { InputProps, InputReturn, InputAriaAttributes, InputState } from "../types/input"
 import { useUI } from "./useUIConfig"
 
 /**
  * Inputコンポーネントのロジックを提供するComposable
- * size, error, disabled, readonlyに基づいてクラスとaria属性を生成
- * Providerから設定されたデフォルト値を使用
+ * 状態とARIA属性のみを返す（スタイル情報なし）
+ * スタイルは StyleAdapter または外部のスタイルパッケージが担当
  */
 export const useInput = (props: Ref<InputProps>): InputReturn => {
     const ui_config = useUI("input")
 
     const is_focused = ref(false)
-    const has_error = computed(() => !!props.value.error)
-    const is_disabled = computed(() => props.value.disabled ?? false)
-    const is_readonly = computed(() => props.value.readonly ?? false)
 
-    const size_classes = computed(() => {
-        const size_map: Record<NonNullable<InputProps["size"]>, string> = {
-            sm: "h-9 text-sm",
-            md: "h-10",
-            lg: "h-11 text-lg"
-        }
-        return size_map[props.value.size ?? ui_config.default_size]
-    })
-
-    const base_classes = computed(() =>
-        cn(
-            "flex w-full rounded-md border border-input bg-background px-3 py-2",
-            "text-sm ring-offset-background",
-            "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-            "placeholder:text-muted-foreground",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            size_classes.value,
-            has_error.value && "border-destructive focus-visible:ring-destructive",
-            is_readonly.value && "bg-muted"
-        )
-    )
+    const state = computed((): InputState => ({
+        type: props.value.type ?? "text",
+        size: props.value.size ?? ui_config.default_size,
+        disabled: props.value.disabled ?? false,
+        readonly: props.value.readonly ?? false,
+        has_error: !!props.value.error
+    }))
 
     const aria_attributes = computed<InputAriaAttributes>(() => ({
-        "aria-invalid": has_error.value || undefined,
+        "aria-invalid": state.value.has_error || undefined,
         "aria-describedby": props.value.error_id,
-        "aria-readonly": is_readonly.value || undefined
+        "aria-readonly": state.value.readonly || undefined
     }))
 
     const handleFocus = () => {
@@ -54,12 +35,9 @@ export const useInput = (props: Ref<InputProps>): InputReturn => {
     }
 
     return {
-        base_classes,
+        state: readonly(state),
         is_focused,
-        has_error,
-        is_disabled,
-        is_readonly,
-        aria_attributes,
+        aria_attributes: readonly(aria_attributes),
         handleFocus,
         handleBlur
     }

@@ -1,0 +1,55 @@
+{
+    "name": "@soave/variables",
+    "version": "0.1.0",
+    "description": "CSS Variables styled components for soave UI",
+    "author": "Arata Ouchi (Original SIN Architecture)",
+    "license": "MIT",
+    "homepage": "https://soave.io",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/artouc/soaveui"
+    },
+    "type": "module",
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        },
+        "./components/*": {
+            "import": "./dist/components/*.mjs",
+            "types": "./dist/components/*.d.ts"
+        },
+        "./styles/*": {
+            "import": "./dist/styles/*.css",
+            "default": "./dist/styles/*.css"
+        },
+        "./styles/tokens.css": {
+            "import": "./dist/styles/tokens.css",
+            "default": "./dist/styles/tokens.css"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "unbuild",
+        "dev": "unbuild --stub",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@soave/ui": "^0.3.0"
+    },
+    "peerDependencies": {
+        "vue": "^3.4.0"
+    },
+    "devDependencies": {
+        "@vue/tsconfig": "^0.5.0",
+        "typescript": "^5.4.0",
+        "unbuild": "^2.0.0",
+        "vue": "^3.4.0",
+        "vue-tsc": "^2.2.12"
+    }
+}

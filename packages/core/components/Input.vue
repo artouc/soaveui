@@ -1,0 +1,42 @@
+<template>
+    <input
+        :type="composable.state.value.type"
+        :value="modelValue"
+        :disabled="composable.state.value.disabled"
+        :readonly="composable.state.value.readonly"
+        :placeholder="placeholder"
+        :id="id"
+        v-bind="composable.aria_attributes.value"
+        @input="handleInput"
+        @focus="composable.handleFocus"
+        @blur="composable.handleBlur"
+    />
+</template>
+
+<script setup lang="ts">
+import { toRef } from "vue"
+import { useInput } from "../../composables/useInput"
+import type { InputProps } from "../../types/input"
+
+interface HeadlessInputProps extends InputProps {
+    modelValue?: string
+}
+
+const props = withDefaults(defineProps<HeadlessInputProps>(), {
+    type: "text",
+    size: "md",
+    disabled: false,
+    readonly: false
+})
+
+const emit = defineEmits<{
+    "update:modelValue": [value: string]
+}>()
+
+const composable = useInput(toRef(() => props))
+
+const handleInput = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    emit("update:modelValue", target.value)
+}
+</script>

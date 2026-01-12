@@ -1,6 +1,5 @@
-import { computed, ref, type Ref } from "vue"
-import { cn } from "../utils/cn"
-import type { FileInputProps, FileInputReturn, FileInputAriaAttributes, FileInfo } from "../types/file-input"
+import { computed, ref, readonly, type Ref } from "vue"
+import type { FileInputProps, FileInputReturn, FileInputAriaAttributes, FileInfo, FileInputState } from "../types/file-input"
 
 const FILE_ERRORS = {
     MAX_SIZE_EXCEEDED: (max: number) => `ファイルサイズが${formatFileSize(max)}を超えています`,
@@ -23,38 +22,27 @@ const createPreviewUrl = (file: File): string | null => {
 
 /**
  * FileInputコンポーネントのロジックを提供するComposable
+ * 状態とARIA属性のみを返す（スタイル情報なし）
+ * スタイルは StyleAdapter または外部のスタイルパッケージが担当
  */
 export const useFileInput = (
     props: Ref<FileInputProps>,
     input_ref: Ref<HTMLInputElement | null>
 ): FileInputReturn => {
-    const is_disabled = computed(() => props.value.disabled ?? false)
     const is_dragging = ref(false)
     const files = ref<FileInfo[]>([])
     const error = ref<string | null>(null)
 
-    const base_classes = computed(() =>
-        cn(
-            "relative",
-            is_disabled.value && "opacity-50 cursor-not-allowed"
-        )
-    )
-
-    const dropzone_classes = computed(() =>
-        cn(
-            "flex flex-col items-center justify-center w-full p-6",
-            "border-2 border-dashed rounded-lg",
-            "transition-colors cursor-pointer",
-            "hover:border-primary hover:bg-primary/5",
-            is_dragging.value && "border-primary bg-primary/10",
-            error.value && "border-destructive",
-            is_disabled.value && "pointer-events-none"
-        )
-    )
+    const state = computed((): FileInputState => ({
+        disabled: props.value.disabled ?? false,
+        is_dragging: is_dragging.value,
+        has_error: !!error.value,
+        has_files: files.value.length > 0
+    }))
 
     const aria_attributes = computed<FileInputAriaAttributes>(() => ({
-        "aria-disabled": is_disabled.value || undefined,
-        "aria-invalid": !!error.value || undefined
+        "aria-disabled": state.value.disabled || undefined,
+        "aria-invalid": state.value.has_error || undefined
     }))
 
     const validateFile = (file: File): string | null => {
@@ -85,7 +73,7 @@ export const useFileInput = (
     }
 
     const handleFiles = (file_list: FileList | null): void => {
-        if (!file_list || is_disabled.value) return
+        if (!file_list || state.value.disabled) return
 
         error.value = null
         const { multiple, max_files } = props.value
@@ -126,7 +114,7 @@ export const useFileInput = (
 
     const handleDragEnter = (event: DragEvent): void => {
         event.preventDefault()
-        if (!is_disabled.value) {
+        if (!state.value.disabled) {
             is_dragging.value = true
         }
     }
@@ -139,7 +127,7 @@ export const useFileInput = (
     const handleDrop = (event: DragEvent): void => {
         event.preventDefault()
         is_dragging.value = false
-        if (!is_disabled.value) {
+        if (!state.value.disabled) {
             handleFiles(event.dataTransfer?.files ?? null)
         }
     }
@@ -160,19 +148,17 @@ export const useFileInput = (
     }
 
     const openFilePicker = (): void => {
-        if (!is_disabled.value && input_ref.value) {
+        if (!state.value.disabled && input_ref.value) {
             input_ref.value.click()
         }
     }
 
     return {
-        base_classes,
-        dropzone_classes,
-        is_disabled,
+        state: readonly(state),
         is_dragging,
         files,
         error,
-        aria_attributes,
+        aria_attributes: readonly(aria_attributes),
         handleFiles,
         handleDragEnter,
         handleDragLeave,

@@ -1,6 +1,7 @@
-import type { ComputedRef, Ref } from "vue"
+import type { ComputedRef, Ref, DeepReadonly } from "vue"
 
 export type TextareaSize = "sm" | "md" | "lg"
+export type TextareaResize = "none" | "vertical" | "horizontal" | "both"
 
 export interface TextareaProps {
     size?: TextareaSize
@@ -10,7 +11,18 @@ export interface TextareaProps {
     error?: string
     error_id?: string
     rows?: number
-    resize?: "none" | "vertical" | "horizontal" | "both"
+    resize?: TextareaResize
+}
+
+/**
+ * テキストエリアの状態（StyleAdapterに渡す用）
+ */
+export interface TextareaState {
+    size: TextareaSize
+    disabled: boolean
+    readonly: boolean
+    has_error: boolean
+    resize: TextareaResize
 }
 
 export interface TextareaAriaAttributes {
@@ -19,13 +31,13 @@ export interface TextareaAriaAttributes {
     "aria-readonly"?: boolean
 }
 
+/**
+ * useTextarea の戻り値（ヘッドレス - スタイル情報なし）
+ */
 export interface TextareaReturn {
-    base_classes: ComputedRef<string>
+    state: DeepReadonly<ComputedRef<TextareaState>>
     is_focused: Ref<boolean>
-    has_error: ComputedRef<boolean>
-    is_disabled: ComputedRef<boolean>
-    is_readonly: ComputedRef<boolean>
-    aria_attributes: ComputedRef<TextareaAriaAttributes>
+    aria_attributes: DeepReadonly<ComputedRef<TextareaAriaAttributes>>
     handleFocus: () => void
     handleBlur: () => void
 }

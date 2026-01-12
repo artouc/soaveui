@@ -18,16 +18,18 @@ export interface ButtonState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     loading: boolean
+    type: "button" | "submit" | "reset"
 }
 
 /**
  * Input の状態
  */
 export interface InputState extends ComponentState {
+    type: "text" | "email" | "password" | "number" | "tel" | "url" | "search"
     size: "sm" | "md" | "lg"
     disabled: boolean
     readonly: boolean
-    error: string | undefined
+    has_error: boolean
 }
 
 /**
@@ -48,6 +50,7 @@ export interface CardState extends ComponentState {
  * Checkbox の状態
  */
 export interface CheckboxState extends ComponentState {
+    size: "sm" | "md" | "lg"
     checked: boolean
     disabled: boolean
     indeterminate: boolean
@@ -56,7 +59,8 @@ export interface CheckboxState extends ComponentState {
 /**
  * Radio の状態
  */
-export interface RadioState extends ComponentState {
+export interface RadioItemState extends ComponentState {
+    size: "sm" | "md" | "lg"
     checked: boolean
     disabled: boolean
 }
@@ -65,6 +69,7 @@ export interface RadioState extends ComponentState {
  * Switch の状態
  */
 export interface SwitchState extends ComponentState {
+    size: "sm" | "md" | "lg"
     checked: boolean
     disabled: boolean
 }
@@ -76,16 +81,42 @@ export interface TextareaState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     readonly: boolean
-    error: string | undefined
+    has_error: boolean
+    resize: "none" | "vertical" | "horizontal" | "both"
 }
 
 /**
- * Select の状態
+ * Select Trigger の状態
  */
-export interface SelectState extends ComponentState {
+export interface SelectTriggerState extends ComponentState {
     size: "sm" | "md" | "lg"
     disabled: boolean
     is_open: boolean
+}
+
+/**
+ * Select Content の状態
+ */
+export interface SelectContentState extends ComponentState {
+    is_open: boolean
+}
+
+/**
+ * Select Item の状態
+ */
+export interface SelectItemState extends ComponentState {
+    selected: boolean
+    disabled: boolean
+}
+
+/**
+ * FileInput の状態
+ */
+export interface FileInputState extends ComponentState {
+    disabled: boolean
+    is_dragging: boolean
+    has_error: boolean
+    has_files: boolean
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref } from "vue"
+import type { ComputedRef, Ref, DeepReadonly } from "vue"
 
 export type InputSize = "sm" | "md" | "lg"
 export type InputType = "text" | "email" | "password" | "number" | "tel" | "url" | "search"
@@ -11,6 +11,18 @@ export interface InputProps {
     readonly?: boolean
     error?: string
     error_id?: string
+    id?: string
+}
+
+/**
+ * 入力の状態（StyleAdapterに渡す用）
+ */
+export interface InputState {
+    type: InputType
+    size: InputSize
+    disabled: boolean
+    readonly: boolean
+    has_error: boolean
 }
 
 export interface InputAriaAttributes {
@@ -19,13 +31,13 @@ export interface InputAriaAttributes {
     "aria-readonly"?: boolean
 }
 
+/**
+ * useInput の戻り値（ヘッドレス - スタイル情報なし）
+ */
 export interface InputReturn {
-    base_classes: ComputedRef<string>
+    state: DeepReadonly<ComputedRef<InputState>>
     is_focused: Ref<boolean>
-    has_error: ComputedRef<boolean>
-    is_disabled: ComputedRef<boolean>
-    is_readonly: ComputedRef<boolean>
-    aria_attributes: ComputedRef<InputAriaAttributes>
+    aria_attributes: DeepReadonly<ComputedRef<InputAriaAttributes>>
     handleFocus: () => void
     handleBlur: () => void
 }

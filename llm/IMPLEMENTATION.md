@@ -1,6 +1,6 @@
-# Vue UI Composer Style Adapter System 実装ガイド
+# Vue UI Composer - 完全ヘッドレス化 実装ガイド v2.1
 
-**Version**: 1.0.0  
+**Version**: 2.1.0  
 **Date**: 2026-01-12  
 **Status**: 実装フェーズ
 
@@ -8,70 +8,49 @@
 
 ## 概要
 
-このガイドは、Headless-First アーキテクチャと Style Adapter System を Vue UI Composer に段階的に実装するための手順書です。
+Vue UI Composer を **完全ヘッドレス化** し、スタイル層を独立したパッケージに分離する実装手順です。
+
+**核心設計**:
+- ✅ `@soave/ui`: ロジック + ARIA属性のみ（スタイル情報ゼロ）
+- ✅ `@soave/tailwind`: Core に依存し、Tailwind スタイルを提供
+- ✅ `@soave/variables`: Core に依存し、CSS Variables スタイルを提供
+- ✅ ユーザーが好きなスタイルシステムを選択可能
 
 ---
 
-## Phase 1: Composable の Headless 化（1週間）
+## パッケージ依存関係図
 
-### Step 1.1: 型定義の準備
+```
+@soave/ui
+├── composables (useButton, useInput...)
+├── components/headless (HeadlessButton...)
+├── types
+└── utils
 
-```typescript
-// packages/core/types/composables.ts
-export interface ButtonState {
-  variant: 'primary' | 'secondary' | 'ghost' | 'outline';
-  size: 'sm' | 'md' | 'lg';
-  disabled: boolean;
-}
+  ↑ ↑ ↑
+  依存 依存 依存
 
-export interface InputState {
-  size: 'sm' | 'md' | 'lg';
-  disabled: boolean;
-  error?: string;
-}
-
-export interface DialogState {
-  isOpen: boolean;
-}
-
-export interface FormFieldState {
-  error?: string;
-  touched: boolean;
-}
-
-// 状態オブジェクトの汎用型
-export interface ComponentState {
-  [key: string]: any;
-}
-
-// Composable の戻り値型
-export interface ComposableReturn<T extends ComponentState> {
-  state: Readonly<Ref<T>>;
-  ariaAttributes: Readonly<Ref<Record<string, string | boolean>>>;
-}
+@soave/tailwind              @soave/variables         カスタム実装
+├── Button.vue           ├── Button.vue            ├── MyButton.vue
+├── Input.vue            ├── Input.vue             └── ...
+├── Card.vue             └── ...
+└── tailwind.config.js
+   （Tailwind設定）       （CSS Variables設定）      （任意）
 ```
 
-### Step 1.2: useButton の Headless 化
+**重要**: `@soave/tailwind` と `@soave/variables` は **Core に依存する**が、**Core は Style に依存しない**（一方向依存）
 
-**変更前（現在）**:
-```typescript
-// ❌ スタイル情報をComposableが返している
-export const useButton = (props: Ref<ButtonProps>) => {
-  const classes = computed(() => ({
-    base: 'inline-flex...',
-    variant: variantMap[props.value.variant],
-    size: sizeMap[props.value.size]
-  }));
-  
-  return { classes, isDisabled, ariaAttributes };
-};
-```
+---
 
-**変更後（Headless）**:
+## Phase 1: Core Package の Headless 化（2週間）
+
+### Step 1.1: Composable - 状態とARIA属性のみ
+
+#### useButton
+
 ```typescript
 // packages/core/composables/useButton.ts
 import { computed, readonly, type Ref } from 'vue';
-import type { ButtonState, ComposableReturn } from '../types/composables';
 
 export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
@@ -80,20 +59,31 @@ export interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-export const useButton = (props: Ref<ButtonProps>): ComposableReturn<ButtonState> => {
-  // ✅ ロジック情報のみ
+export interface ButtonState {
+  variant: 'primary' | 'secondary' | 'ghost' | 'outline';
+  size: 'sm' | 'md' | 'lg';
+  disabled: boolean;
+  type: 'button' | 'submit' | 'reset';
+}
+
+/**
+ * ✅ 返すのは「状態」と「ARIA属性」だけ
+ * スタイル情報は一切含まない
+ */
+export const useButton = (props: Ref<ButtonProps>) => {
   const state = computed((): ButtonState => ({
     variant: props.value.variant ?? 'primary',
     size: props.value.size ?? 'md',
-    disabled: props.value.disabled ?? false
+    disabled: props.value.disabled ?? false,
+    type: props.value.type ?? 'button'
   }));
-  
+
   const ariaAttributes = computed(() => ({
     'aria-disabled': state.value.disabled,
     role: 'button',
-    type: props.value.type ?? 'button'
+    type: state.value.type
   }));
-  
+
   return {
     state: readonly(state),
     ariaAttributes: readonly(ariaAttributes)
@@ -101,439 +91,58 @@ export const useButton = (props: Ref<ButtonProps>): ComposableReturn<ButtonState
 };
 ```
 
-### Step 1.3: 他の Composable も同様に更新
+#### useInput
 
 ```typescript
 // packages/core/composables/useInput.ts
-export const useInput = (props: Ref<InputProps>): ComposableReturn<InputState> => {
+export interface InputProps {
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  error?: string;
+  id?: string;
+  type?: string;
+}
+
+export interface InputState {
+  size: 'sm' | 'md' | 'lg';
+  disabled: boolean;
+  error?: string;
+}
+
+export const useInput = (props: Ref<InputProps>) => {
   const state = computed((): InputState => ({
     size: props.value.size ?? 'md',
     disabled: props.value.disabled ?? false,
     error: props.value.error
   }));
-  
+
   const ariaAttributes = computed(() => ({
     'aria-disabled': state.value.disabled,
     'aria-invalid': !!state.value.error,
-    'aria-describedby': state.value.error ? `error-${props.value.id}` : undefined
+    'aria-describedby': state.value.error 
+      ? `${props.value.id}-error` 
+      : undefined
   }));
-  
+
   return {
     state: readonly(state),
     ariaAttributes: readonly(ariaAttributes)
   };
 };
-
-// packages/core/composables/useDialog.ts
-export const useDialog = (props: Ref<DialogProps>): ComposableReturn<DialogState> => {
-  const state = computed((): DialogState => ({
-    isOpen: props.value.open ?? false
-  }));
-  
-  const ariaAttributes = computed(() => ({
-    role: 'dialog',
-    'aria-modal': 'true'
-  }));
-  
-  return {
-    state: readonly(state),
-    ariaAttributes: readonly(ariaAttributes)
-  };
-};
-
-// packages/core/composables/useCheckbox.ts
-// ... 同様に更新
-
-// packages/core/composables/useSelect.ts
-// ... 同様に更新
 ```
 
-### Step 1.4: Composable Index の更新
+#### useDialog, useCheckbox, useSelect, useForm
 
-```typescript
-// packages/core/composables/index.ts
-export { useButton, type ButtonProps } from './useButton';
-export { useInput, type InputProps } from './useInput';
-export { useDialog, type DialogProps } from './useDialog';
-export { useCheckbox, type CheckboxProps } from './useCheckbox';
-export { useSelect, type SelectProps } from './useSelect';
-export { useForm } from './useForm';
-export { useUIConfig } from './useUIConfig';
+他の Composable も同じパターン（状態 + ARIA属性のみ）
 
-export type {
-  ButtonState,
-  InputState,
-  DialogState,
-  ComponentState,
-  ComposableReturn
-} from '../types/composables';
-```
+### Step 1.2: Headless Components
 
----
-
-## Phase 2: Style Adapter System 実装（1週間）
-
-### Step 2.1: Adapter インターフェース定義
-
-```typescript
-// packages/core/adapters/types.ts
-import type { ButtonState, InputState, DialogState, ComponentState } from '../types/composables';
-
-/**
- * Style Adapter インターフェース
- * コンポーネントの状態からスタイルクラスを生成する
- */
-export interface StyleAdapter {
-  /**
-   * Adapter の識別名
-   */
-  name: 'tailwind' | 'css-variables' | 'headless' | string;
-  
-  /**
-   * コンポーネント名と状態からクラス文字列を生成
-   * @param component コンポーネント名（'button', 'input' など）
-   * @param state コンポーネントの状態オブジェクト
-   * @returns CSS クラス文字列
-   */
-  getClasses(component: string, state: ComponentState): string;
-  
-  /**
-   * Adapter の詳細情報（オプション）
-   */
-  description?: string;
-}
-
-/**
- * Adapter レジストリ
- */
-export const ADAPTER_REGISTRY = new Map<string, StyleAdapter>();
-
-/**
- * Adapter を登録
- */
-export const registerAdapter = (adapter: StyleAdapter) => {
-  ADAPTER_REGISTRY.set(adapter.name, adapter);
-};
-
-/**
- * Adapter を取得
- */
-export const getAdapter = (name: string): StyleAdapter | undefined => {
-  return ADAPTER_REGISTRY.get(name);
-};
-```
-
-### Step 2.2: Tailwind Adapter 実装
-
-```typescript
-// packages/core/adapters/tailwind.ts
-import { cn } from '../utils/cn';
-import type { StyleAdapter } from './types';
-import type { ButtonState, InputState } from '../types/composables';
-
-export const tailwindAdapter: StyleAdapter = {
-  name: 'tailwind',
-  description: 'Tailwind CSS ベースのスタイリング',
-  
-  getClasses(component: string, state) {
-    switch (component) {
-      case 'button':
-        return getTailwindButtonClasses(state as ButtonState);
-      case 'input':
-        return getTailwindInputClasses(state as InputState);
-      case 'card':
-        return getTailwindCardClasses(state);
-      case 'dialog':
-        return getTailwindDialogClasses(state);
-      // ... その他のコンポーネント
-      default:
-        return '';
-    }
-  }
-};
-
-function getTailwindButtonClasses(state: ButtonState): string {
-  const variantMap = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
-    ghost: 'hover:bg-accent hover:text-accent-foreground',
-    outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-  };
-  
-  const sizeMap = {
-    sm: 'h-9 px-3 text-sm',
-    md: 'h-10 px-4 py-2',
-    lg: 'h-11 px-8 text-lg'
-  };
-  
-  return cn(
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none',
-    variantMap[state.variant],
-    sizeMap[state.size],
-    state.disabled && 'opacity-50 cursor-not-allowed'
-  );
-}
-
-function getTailwindInputClasses(state: InputState): string {
-  const sizeMap = {
-    sm: 'h-9 px-3 text-sm',
-    md: 'h-10 px-4 py-2',
-    lg: 'h-11 px-4 text-lg'
-  };
-  
-  return cn(
-    'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-    sizeMap[state.size],
-    state.error && 'border-destructive focus-visible:ring-destructive',
-    state.disabled && 'bg-muted'
-  );
-}
-
-function getTailwindCardClasses(state: any): string {
-  return cn(
-    'rounded-lg border border-card-border bg-card text-card-foreground shadow-sm'
-  );
-}
-
-function getTailwindDialogClasses(state: any): string {
-  return cn(
-    'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] rounded-lg border bg-background p-4 shadow-lg sm:rounded-lg'
-  );
-}
-```
-
-### Step 2.3: CSS Variables Adapter 実装
-
-```typescript
-// packages/core/adapters/css-variables.ts
-import type { StyleAdapter } from './types';
-
-export const cssVariablesAdapter: StyleAdapter = {
-  name: 'css-variables',
-  description: 'CSS Variables ベースのスタイリング（BEM命名）',
-  
-  getClasses(component: string, state) {
-    switch (component) {
-      case 'button':
-        return getCssVariablesButtonClasses(state);
-      case 'input':
-        return getCssVariablesInputClasses(state);
-      case 'card':
-        return getCssVariablesCardClasses(state);
-      case 'dialog':
-        return getCssVariablesDialogClasses(state);
-      default:
-        return '';
-    }
-  }
-};
-
-function getCssVariablesButtonClasses(state: any): string {
-  return [
-    'button',
-    `button--${state.variant}`,
-    `button--${state.size}`,
-    state.disabled && 'button--disabled'
-  ]
-    .filter(Boolean)
-    .join(' ');
-}
-
-function getCssVariablesInputClasses(state: any): string {
-  return [
-    'input',
-    `input--${state.size}`,
-    state.error && 'input--error',
-    state.disabled && 'input--disabled'
-  ]
-    .filter(Boolean)
-    .join(' ');
-}
-
-function getCssVariablesCardClasses(state: any): string {
-  return 'card';
-}
-
-function getCssVariablesDialogClasses(state: any): string {
-  return [
-    'dialog',
-    state.isOpen && 'dialog--open'
-  ]
-    .filter(Boolean)
-    .join(' ');
-}
-```
-
-### Step 2.4: Headless Adapter 実装
-
-```typescript
-// packages/core/adapters/headless.ts
-import type { StyleAdapter } from './types';
-
-export const headlessAdapter: StyleAdapter = {
-  name: 'headless',
-  description: 'Headless モード（スタイル適用なし）',
-  
-  getClasses(component: string, state): string {
-    // ✅ スタイル情報を返さない
-    return '';
-  }
-};
-```
-
-### Step 2.5: Adapter の登録と Export
-
-```typescript
-// packages/core/adapters/index.ts
-import { registerAdapter } from './types';
-import { tailwindAdapter } from './tailwind';
-import { cssVariablesAdapter } from './css-variables';
-import { headlessAdapter } from './headless';
-
-export type { StyleAdapter } from './types';
-export { tailwindAdapter, cssVariablesAdapter, headlessAdapter };
-
-// 組み込み Adapter を登録
-registerAdapter(tailwindAdapter);
-registerAdapter(cssVariablesAdapter);
-registerAdapter(headlessAdapter);
-```
-
----
-
-## Phase 3: UIProvider での Adapter 統合（1週間）
-
-### Step 3.1: UIProvider Context の拡張
-
-```typescript
-// packages/core/composables/useUIConfig.ts
-import { 
-  inject, 
-  provide, 
-  reactive, 
-  readonly, 
-  type InjectionKey,
-  type Ref
-} from 'vue';
-import type { StyleAdapter } from '../adapters/types';
-import { tailwindAdapter } from '../adapters/tailwind';
-import type { DeepPartial } from '../types/utils';
-
-export interface UIConfig {
-  button: {
-    defaultVariant: 'primary' | 'secondary' | 'ghost' | 'outline';
-    defaultSize: 'sm' | 'md' | 'lg';
-  };
-  input: {
-    defaultSize: 'sm' | 'md' | 'lg';
-  };
-  card: {
-    defaultPadding: 'sm' | 'md' | 'lg';
-  };
-}
-
-export interface UIProviderContext {
-  config: UIConfig;
-  adapter: StyleAdapter;
-}
-
-const defaultConfig: UIConfig = {
-  button: {
-    defaultVariant: 'primary',
-    defaultSize: 'md'
-  },
-  input: {
-    defaultSize: 'md'
-  },
-  card: {
-    defaultPadding: 'md'
-  }
-};
-
-export const UIConfigKey: InjectionKey<UIProviderContext> = Symbol('ui-config');
-
-/**
- * UIProvider を設定
- */
-export const useUIProvider = (
-  config: DeepPartial<UIConfig> = {},
-  adapter: StyleAdapter = tailwindAdapter
-) => {
-  const merged = reactive(deepMerge(defaultConfig, config)) as UIConfig;
-  
-  const context: UIProviderContext = {
-    config: merged,
-    adapter
-  };
-  
-  provide(UIConfigKey, context);
-  return context;
-};
-
-/**
- * UIConfig を取得
- */
-export const useUI = <K extends keyof UIConfig>(component: K): Readonly<UIConfig[K]> => {
-  const context = inject<UIProviderContext>(UIConfigKey);
-  if (!context) {
-    console.warn(`UIProvider context not found for ${component}`);
-    return readonly(defaultConfig[component]) as any;
-  }
-  return readonly(context.config[component]);
-};
-
-/**
- * Style Adapter を取得
- */
-export const useStyleAdapter = (): StyleAdapter => {
-  const context = inject<UIProviderContext>(UIConfigKey);
-  if (!context) {
-    console.warn('UIProvider context not found');
-    return tailwindAdapter;
-  }
-  return context.adapter;
-};
-```
-
-### Step 3.2: UIProvider コンポーネント実装
+#### HeadlessButton
 
 ```vue
-<!-- packages/nuxt/runtime/components/UIProvider.vue -->
-<template>
-  <slot />
-</template>
-
-<script setup lang="ts">
-import { useUIProvider } from '@vue-ui-composer/core/composables/useUIConfig';
-import type { StyleAdapter } from '@vue-ui-composer/core/adapters/types';
-import { tailwindAdapter } from '@vue-ui-composer/core/adapters/tailwind';
-import type { UIConfig } from '@vue-ui-composer/core/composables/useUIConfig';
-
-interface Props {
-  config?: Partial<UIConfig>;
-  adapter?: StyleAdapter;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  adapter: () => tailwindAdapter
-});
-
-// UIProvider を設定
-useUIProvider(props.config, props.adapter);
-</script>
-```
-
----
-
-## Phase 4: コンポーネント更新（2週間）
-
-### Step 4.1: Button コンポーネント更新
-
-```vue
-<!-- packages/core/components/ui/Button.vue -->
+<!-- packages/core/components/headless/Button.vue -->
 <template>
   <button
-    :class="[computedClasses, props.class]"
     :disabled="composable.state.value.disabled"
     v-bind="composable.ariaAttributes.value"
     @click="$emit('click', $event)"
@@ -543,497 +152,680 @@ useUIProvider(props.config, props.adapter);
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue';
+import { toRefs } from 'vue';
 import { useButton, type ButtonProps } from '~/composables/useButton';
-import { useStyleAdapter } from '~/composables/useUIConfig';
 
-interface ButtonComponentProps extends ButtonProps {
-  class?: string;
-  unstyled?: boolean;
+defineProps<ButtonProps>();
+
+const emit = defineEmits<{
+  click: [event: MouseEvent];
+}>();
+
+const composable = useButton(toRefs(defineProps<ButtonProps>()));
+</script>
+
+<style scoped>
+/* ✅ スタイルなし */
+</style>
+```
+
+**特徴**:
+- `class` 属性なし（ユーザーが完全に制御）
+- ロジック・ARIA・イベントハンドリングのみ
+- シンプルで予測可能
+
+#### HeadlessInput
+
+```vue
+<!-- packages/core/components/headless/Input.vue -->
+<template>
+  <input
+    :value="modelValue"
+    :disabled="composable.state.value.disabled"
+    v-bind="composable.ariaAttributes.value"
+    @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+  />
+</template>
+
+<script setup lang="ts">
+import { toRefs } from 'vue';
+import { useInput, type InputProps } from '~/composables/useInput';
+
+interface HeadlessInputProps extends InputProps {
+  modelValue?: string;
 }
 
-const props = withDefaults(defineProps<ButtonComponentProps>(), {
+defineProps<HeadlessInputProps>();
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string];
+}>();
+
+const composable = useInput(toRefs(defineProps<HeadlessInputProps>()));
+</script>
+
+<style scoped>
+/* ✅ スタイルなし */
+</style>
+```
+
+#### HeadlessCard, HeadlessDialog 等
+
+同じパターンで実装
+
+### Step 1.3: Index ファイル
+
+```typescript
+// packages/core/composables/index.ts
+export { useButton, type ButtonProps, type ButtonState } from './useButton';
+export { useInput, type InputProps, type InputState } from './useInput';
+export { useDialog, type DialogProps, type DialogState } from './useDialog';
+export { useCheckbox, type CheckboxProps } from './useCheckbox';
+export { useSelect, type SelectProps } from './useSelect';
+export { useForm } from './useForm';
+
+// packages/core/components/index.ts
+export { default as HeadlessButton } from './headless/Button.vue';
+export { default as HeadlessInput } from './headless/Input.vue';
+export { default as HeadlessCard } from './headless/Card.vue';
+export { default as HeadlessDialog } from './headless/Dialog.vue';
+export { default as HeadlessCheckbox } from './headless/Checkbox.vue';
+export { default as HeadlessSelect } from './headless/Select.vue';
+```
+
+---
+
+## Phase 2: @soave/tailwind Package（1週間）
+
+### Step 2.1: 構成
+
+```
+packages/style/
+├── components/
+│   ├── Button.vue       ← HeadlessButton + Tailwind classes
+│   ├── Input.vue
+│   ├── Card.vue
+│   └── Dialog.vue
+├── styles/              ← 追加スタイル（任意）
+├── tailwind.config.js   ← Tailwind 設定
+├── package.json
+└── README.md
+```
+
+### Step 2.2: Styled Components - Tailwind ベース
+
+#### Button.vue
+
+```vue
+<!-- packages/style/components/Button.vue -->
+<template>
+  <HeadlessButton
+    :class="computedClasses"
+    :variant="variant"
+    :size="size"
+    :disabled="disabled"
+    :type="type"
+    @click="$emit('click', $event)"
+  >
+    <slot />
+  </HeadlessButton>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { HeadlessButton } from '@soave/ui';
+import type { ButtonProps } from '@soave/ui/composables/useButton';
+
+interface StyledButtonProps extends ButtonProps {
+  class?: string;
+}
+
+const props = withDefaults(defineProps<StyledButtonProps>(), {
   variant: 'primary',
-  size: 'md',
-  disabled: false,
-  unstyled: false
+  size: 'md'
 });
 
 const emit = defineEmits<{
   click: [event: MouseEvent];
 }>();
 
-const composable = useButton(toRefs(props));
-const styleAdapter = useStyleAdapter();
-
-// ✅ Adapter からクラスを取得
+// ✅ スタイル生成ロジックはここだけ
 const computedClasses = computed(() => {
-  if (props.unstyled) {
-    return '';
-  }
-  return styleAdapter.getClasses('button', composable.state.value);
+  const base =
+    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
+  const variants = {
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
+    ghost: 'hover:bg-accent hover:text-accent-foreground',
+    outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
+  };
+
+  const sizes = {
+    sm: 'h-9 px-3 text-sm',
+    md: 'h-10 px-4 py-2',
+    lg: 'h-11 px-8'
+  };
+
+  return [
+    base,
+    variants[props.variant],
+    sizes[props.size],
+    props.disabled && 'opacity-50 cursor-not-allowed disabled:pointer-events-none',
+    props.class
+  ]
+    .filter(Boolean)
+    .join(' ');
 });
 </script>
 ```
 
-### Step 4.2: Input コンポーネント更新
+**特徴**:
+- ✅ `@soave/ui` の `HeadlessButton` を使用
+- ✅ Tailwind クラスを追加
+- ✅ `class` prop で追加カスタマイズ可能
+- ✅ Core の更新に自動で対応
+
+#### Input.vue
 
 ```vue
-<!-- packages/core/components/ui/Input.vue -->
+<!-- packages/style/components/Input.vue -->
 <template>
-  <div class="input-wrapper">
-    <input
-      :class="[computedClasses, props.class]"
-      :disabled="composable.state.value.disabled"
-      :value="modelValue"
-      v-bind="composable.ariaAttributes.value"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+  <div class="input-container">
+    <HeadlessInput
+      :class="computedClasses"
+      :model-value="modelValue"
+      :size="size"
+      :error="error"
+      :disabled="disabled"
+      :id="id"
+      @update:model-value="$emit('update:modelValue', $event)"
     />
-    <div v-if="composable.state.value.error" :id="`error-${id}`" class="input-error">
-      {{ composable.state.value.error }}
+    <div v-if="error" :id="`${id}-error`" class="text-sm text-destructive mt-2">
+      {{ error }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue';
-import { useInput, type InputProps } from '~/composables/useInput';
-import { useStyleAdapter } from '~/composables/useUIConfig';
-
-interface InputComponentProps extends InputProps {
-  modelValue?: string;
-  class?: string;
-  unstyled?: boolean;
-}
-
-const props = withDefaults(defineProps<InputComponentProps>(), {
-  modelValue: '',
-  size: 'md',
-  disabled: false,
-  unstyled: false
-});
-
-const emit = defineEmits<{
-  'update:modelValue': [value: string];
-}>();
-
-const composable = useInput(toRefs(props));
-const styleAdapter = useStyleAdapter();
-
-const computedClasses = computed(() => {
-  if (props.unstyled) {
-    return '';
-  }
-  return styleAdapter.getClasses('input', composable.state.value);
-});
-</script>
-```
-
-### Step 4.3: Card コンポーネント更新
-
-```vue
-<!-- packages/core/components/ui/Card.vue -->
-<template>
-  <div :class="[computedClasses, props.class]">
-    <slot />
-  </div>
-</template>
-
-<script setup lang="ts">
 import { computed } from 'vue';
-import { useStyleAdapter } from '~/composables/useUIConfig';
+import { HeadlessInput } from '@soave/ui';
 
-interface CardComponentProps {
+interface Props {
+  modelValue?: string;
+  size?: 'sm' | 'md' | 'lg';
+  error?: string;
+  disabled?: boolean;
   class?: string;
-  unstyled?: boolean;
+  id?: string;
 }
 
-const props = withDefaults(defineProps<CardComponentProps>(), {
-  unstyled: false
+const props = withDefaults(defineProps<Props>(), {
+  size: 'md'
 });
 
-const styleAdapter = useStyleAdapter();
-
 const computedClasses = computed(() => {
-  if (props.unstyled) {
-    return '';
-  }
-  return styleAdapter.getClasses('card', {});
+  const base =
+    'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors';
+
+  const sizes = {
+    sm: 'h-9 text-xs',
+    md: 'h-10 text-sm',
+    lg: 'h-11 text-base'
+  };
+
+  return [
+    base,
+    sizes[props.size],
+    props.error && 'border-destructive focus-visible:ring-destructive',
+    props.disabled && 'bg-muted opacity-50 cursor-not-allowed',
+    props.class
+  ]
+    .filter(Boolean)
+    .join(' ');
 });
 </script>
 ```
 
-### Step 4.4: 他のコンポーネントも同様に更新
+#### Card.vue, Dialog.vue
 
-- Dialog.vue
-- Checkbox.vue
-- Select.vue
-- Textarea.vue
-- Switch.vue
-- RadioGroup.vue
+同じパターンで実装
+
+### Step 2.3: Tailwind Config
+
+```javascript
+// packages/style/tailwind.config.js
+export default {
+  content: [
+    './components/**/*.vue',
+    './pages/**/*.vue'
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: 'hsl(210, 100%, 50%)',
+        'primary-foreground': 'hsl(0, 0%, 100%)',
+        secondary: 'hsl(0, 0%, 96%)',
+        'secondary-foreground': 'hsl(0, 0%, 0%)',
+        accent: 'hsl(0, 0%, 8%)',
+        'accent-foreground': 'hsl(0, 0%, 100%)',
+        destructive: 'hsl(0, 84%, 60%)',
+        'destructive-foreground': 'hsl(0, 0%, 100%)',
+        background: 'hsl(0, 0%, 100%)',
+        card: 'hsl(0, 0%, 100%)',
+        'card-border': 'hsl(210, 40%, 90%)',
+        'card-foreground': 'hsl(0, 0%, 0%)',
+        muted: 'hsl(210, 40%, 96%)',
+        'muted-foreground': 'hsl(210, 40%, 40%)',
+        input: 'hsl(210, 40%, 96%)',
+        'input-border': 'hsl(210, 40%, 90%)',
+        ring: 'hsl(210, 100%, 50%)'
+      }
+    }
+  }
+};
+```
+
+### Step 2.4: Package.json
+
+```json
+{
+  "name": "@soave/tailwind",
+  "version": "1.0.0",
+  "description": "Tailwind CSS styled components for Vue UI Composer Core",
+  "type": "module",
+  "main": "./components/index.js",
+  "exports": {
+    ".": {
+      "import": "./components/index.js"
+    },
+    "./components/*": {
+      "import": "./components/*.vue"
+    },
+    "./tailwind.config.js": "./tailwind.config.js"
+  },
+  "dependencies": {
+    "@soave/ui": "^2.0.0",
+    "vue": "^3.3.0",
+    "tailwindcss": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+```
+
+**ポイント**:
+- ✅ `@soave/ui` を **dependencies** に指定
+- ✅ `tailwindcss` も **dependencies**（Tailwind classes 生成に必須）
+- ✅ 明示的な依存で、ユーザーが安心して使用可能
 
 ---
 
-## Phase 5: CSS Variables 設計（1週間）
+## Phase 3: @soave/variables Package（1週間）
 
-### Step 5.1: CSS Variables Token 定義
+### Step 3.1: 構成
+
+```
+packages/style-css/
+├── components/
+│   ├── Button.vue
+│   ├── Input.vue
+│   └── Card.vue
+├── styles/
+│   ├── tokens.css
+│   ├── button.css
+│   ├── input.css
+│   └── card.css
+├── package.json
+└── README.md
+```
+
+### Step 3.2: CSS Variables ベースのコンポーネント
+
+#### Button.vue
+
+```vue
+<!-- packages/style-css/components/Button.vue -->
+<template>
+  <HeadlessButton
+    :class="['button', `button--${variant}`, `button--${size}`, props.class]"
+    :variant="variant"
+    :size="size"
+    :disabled="disabled"
+    :type="type"
+    @click="$emit('click', $event)"
+  >
+    <slot />
+  </HeadlessButton>
+</template>
+
+<script setup lang="ts">
+import { HeadlessButton } from '@soave/ui';
+import type { ButtonProps } from '@soave/ui/composables/useButton';
+
+interface StyledButtonProps extends ButtonProps {
+  class?: string;
+}
+
+const props = withDefaults(defineProps<StyledButtonProps>(), {
+  variant: 'primary',
+  size: 'md'
+});
+
+const emit = defineEmits<{
+  click: [event: MouseEvent];
+}>();
+</script>
+
+<style scoped>
+@import '../styles/button.css';
+</style>
+```
+
+**特徴**:
+- ✅ BEM クラス命名（`.button--primary`, `.button--md`）
+- ✅ CSS ファイルは別途管理
+- ✅ CSS Variables で完全カスタマイズ可能
+
+#### styles/tokens.css
 
 ```css
-/* packages/core/styles/css-variables.css */
+/* packages/style-css/styles/tokens.css */
 
 :root {
-  /* ========== Colors ========== */
+  /* Colors */
   --color-primary: hsl(210, 100%, 50%);
   --color-primary-foreground: hsl(0, 0%, 100%);
-  --color-primary-hover: hsl(210, 100%, 45%);
-  --color-primary-active: hsl(210, 100%, 40%);
-  
   --color-secondary: hsl(0, 0%, 96%);
   --color-secondary-foreground: hsl(0, 0%, 0%);
-  --color-secondary-hover: hsl(0, 0%, 90%);
-  
   --color-accent: hsl(0, 0%, 8%);
-  --color-accent-foreground: hsl(0, 0%, 100%);
-  
-  --color-destructive: hsl(0, 84%, 60%);
-  --color-destructive-foreground: hsl(0, 0%, 100%);
-  
   --color-input: hsl(210, 40%, 96%);
-  --color-input-border: hsl(210, 40%, 90%);
-  --color-input-error: hsl(0, 84%, 60%);
-  
   --color-card: hsl(0, 0%, 100%);
-  --color-card-border: hsl(210, 40%, 90%);
-  --color-card-foreground: hsl(0, 0%, 0%);
+  --color-destructive: hsl(0, 84%, 60%);
   
-  /* ========== Sizing ========== */
-  --size-xs: 0.75rem;
-  --size-sm: 0.875rem;
-  --size-md: 1rem;
-  --size-lg: 1.125rem;
-  --size-xl: 1.25rem;
-  
-  /* ========== Spacing ========== */
-  --space-0-5: 0.125rem;
-  --space-1: 0.25rem;
+  /* Spacing */
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
   
-  /* ========== Border ========== */
-  --radius-sm: 0.375rem;
+  /* Border */
   --radius-md: 0.5rem;
   --radius-lg: 0.625rem;
-  --radius-full: 9999px;
   
-  --border-width-1: 1px;
-  --border-width-2: 2px;
-  
-  /* ========== Typography ========== */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-mono: 'Courier New', monospace;
-  
-  --font-weight-normal: 400;
+  /* Typography */
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  
-  --line-height-tight: 1.2;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-  
-  /* ========== Transitions ========== */
-  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-slow: 350ms cubic-bezier(0.16, 1, 0.3, 1);
-  
-  /* ========== Shadows ========== */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* ========== Button Styles ========== */
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: hsl(210, 100%, 60%);
+    --color-secondary: hsl(210, 9%, 16%);
+    --color-card: hsl(210, 9%, 10%);
+  }
+}
+```
+
+#### styles/button.css
+
+```css
+/* packages/style-css/styles/button.css */
+
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-medium);
-  font-size: var(--size-md);
-  transition: all var(--transition-normal);
   border: none;
   cursor: pointer;
-  font-family: var(--font-family-base);
+  transition: all 250ms ease;
 }
 
 .button--primary {
   background-color: var(--color-primary);
   color: var(--color-primary-foreground);
-  border: var(--border-width-1) solid var(--color-primary);
 }
 
 .button--primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-}
-
-.button--primary:active:not(:disabled) {
-  background-color: var(--color-primary-active);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .button--secondary {
   background-color: var(--color-secondary);
   color: var(--color-secondary-foreground);
-  border: var(--border-width-1) solid var(--color-input-border);
-}
-
-.button--secondary:hover:not(:disabled) {
-  background-color: var(--color-secondary-hover);
-}
-
-.button--outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: var(--border-width-1) solid var(--color-input-border);
-}
-
-.button--outline:hover:not(:disabled) {
-  background-color: var(--color-input);
 }
 
 .button--ghost {
   background-color: transparent;
   color: var(--color-accent);
-  border: none;
 }
 
-.button--ghost:hover:not(:disabled) {
-  background-color: var(--color-input);
+.button--outline {
+  background-color: transparent;
+  border: 1px solid var(--color-input);
+  color: var(--color-accent);
 }
 
 .button--sm {
   padding: var(--space-2) var(--space-3);
-  font-size: var(--size-sm);
-  height: var(--space-8);
+  font-size: 0.875rem;
+  height: 2.25rem;
 }
 
 .button--md {
   padding: var(--space-2) var(--space-4);
-  height: var(--space-10);
+  font-size: 1rem;
+  height: 2.5rem;
 }
 
 .button--lg {
-  padding: var(--space-3) var(--space-8);
-  font-size: var(--size-lg);
-  height: var(--space-11);
+  padding: var(--space-3) var(--space-4);
+  font-size: 1.125rem;
+  height: 2.75rem;
 }
 
-.button--disabled {
+.button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
+```
 
-/* ========== Input Styles ========== */
-.input {
-  display: flex;
-  width: 100%;
-  border-radius: var(--radius-md);
-  border: var(--border-width-1) solid var(--color-input-border);
-  background-color: var(--color-card);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--size-md);
-  font-family: var(--font-family-base);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
+### Step 3.3: Package.json
 
-.input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--color-primary), 0.1);
-}
-
-.input--sm {
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--size-sm);
-  height: var(--space-8);
-}
-
-.input--md {
-  padding: var(--space-2) var(--space-3);
-  height: var(--space-10);
-}
-
-.input--lg {
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--size-lg);
-  height: var(--space-11);
-}
-
-.input--error {
-  border-color: var(--color-input-error);
-}
-
-.input--error:focus {
-  box-shadow: 0 0 0 3px rgba(var(--color-input-error), 0.1);
-}
-
-.input--disabled {
-  background-color: var(--color-input);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* ========== Card Styles ========== */
-.card {
-  border-radius: var(--radius-lg);
-  border: var(--border-width-1) solid var(--color-card-border);
-  background-color: var(--color-card);
-  color: var(--color-card-foreground);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ========== Dialog Styles ========== */
-.dialog {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  z-index: 50;
-  width: 100%;
-  max-width: 32rem;
-  transform: translate(-50%, -50%);
-  border-radius: var(--radius-lg);
-  border: var(--border-width-1) solid var(--color-card-border);
-  background-color: var(--color-card);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
-}
-
-/* ========== Dark Mode ========== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: hsl(210, 100%, 60%);
-    --color-primary-foreground: hsl(0, 0%, 0%);
-    
-    --color-secondary: hsl(210, 9%, 16%);
-    --color-secondary-foreground: hsl(0, 0%, 100%);
-    
-    --color-card: hsl(210, 9%, 10%);
-    --color-card-border: hsl(210, 9%, 20%);
-    --color-card-foreground: hsl(0, 0%, 100%);
-    
-    --color-input: hsl(210, 9%, 16%);
-    --color-input-border: hsl(210, 9%, 25%);
+```json
+{
+  "name": "@soave/variables",
+  "version": "1.0.0",
+  "description": "CSS Variables styled components for Vue UI Composer Core",
+  "type": "module",
+  "exports": {
+    "./components/*": {
+      "import": "./components/*.vue"
+    },
+    "./styles/*": {
+      "import": "./styles/*.css"
+    }
+  },
+  "dependencies": {
+    "@soave/ui": "^2.0.0",
+    "vue": "^3.3.0"
   }
 }
 ```
 
-### Step 5.2: テーマ切り替え Composable
+**ポイント**:
+- ✅ `@soave/ui` を **dependencies** に指定
+- ✅ `tailwindcss` には依存しない（CSS のみ）
+- ✅ より軽量で柔軟
 
-```typescript
-// packages/core/composables/useTheme.ts
-import { ref, watch } from 'vue';
+---
 
-export type Theme = 'light' | 'dark' | 'auto';
+## Phase 4: 実装パターン
 
-export interface ThemeConfig {
-  [key: string]: string | number;
+### パターン A: @soave/tailwind を使用（推奨 - Tailwind）
+
+```vue
+<!-- app.vue -->
+<template>
+  <div>
+    <Button variant="primary" size="md">
+      送信
+    </Button>
+    
+    <Input 
+      v-model="email"
+      type="email"
+      placeholder="メールアドレス"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+// ✅ @soave/tailwind から import
+import Button from '@soave/tailwind/components/Button.vue';
+import Input from '@soave/tailwind/components/Input.vue';
+
+const email = ref('');
+</script>
+```
+
+### パターン B: @soave/variables を使用（CSS Variables）
+
+```vue
+<!-- app.vue -->
+<template>
+  <div>
+    <Button variant="primary" size="md">
+      送信
+    </Button>
+  </div>
+</template>
+
+<script setup lang="ts">
+// ✅ @soave/variables から import
+import Button from '@soave/variables/components/Button.vue';
+// CSS Variables Token を読み込む
+import '@soave/variables/styles/tokens.css';
+</script>
+```
+
+### パターン C: Headless + カスタム CSS
+
+```vue
+<!-- app.vue -->
+<template>
+  <div>
+    <HeadlessButton class="my-button">
+      送信
+    </HeadlessButton>
+  </div>
+</template>
+
+<script setup lang="ts">
+// ✅ Core から直接 import
+import { HeadlessButton } from '@soave/ui';
+</script>
+
+<style scoped>
+.my-button {
+  display: inline-flex;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
 }
 
-export const useTheme = (initialTheme: Theme = 'auto') => {
-  const currentTheme = ref<Theme>(initialTheme);
-  
-  const systemTheme = ref<'light' | 'dark'>('light');
-  
-  // システムテーマを監視
-  if (typeof window !== 'undefined') {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    systemTheme.value = mediaQuery.matches ? 'dark' : 'light';
+.my-button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.my-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>
+```
+
+### パターン D: 複数スタイルの混在
+
+```vue
+<!-- app.vue -->
+<template>
+  <div>
+    <!-- @soave/tailwind から -->
+    <Button variant="primary">Tailwind Button</Button>
     
-    mediaQuery.addEventListener('change', (e) => {
-      systemTheme.value = e.matches ? 'dark' : 'light';
-      if (currentTheme.value === 'auto') {
-        applyTheme('auto');
-      }
-    });
-  }
-  
-  /**
-   * テーマを適用
-   */
-  const applyTheme = (theme: Theme) => {
-    currentTheme.value = theme;
+    <!-- @soave/variables から -->
+    <MyButton variant="secondary">CSS Vars Button</MyButton>
     
-    if (typeof document === 'undefined') return;
-    
-    const htmlElement = document.documentElement;
-    const effectiveTheme = theme === 'auto' ? systemTheme.value : theme;
-    
-    htmlElement.setAttribute('data-theme', effectiveTheme);
-    
-    // local storage に保存
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('app-theme', theme);
-    }
-  };
-  
-  /**
-   * カスタムテーマを設定
-   */
-  const setCustomTheme = (config: ThemeConfig) => {
-    if (typeof document === 'undefined') return;
-    
-    const root = document.documentElement;
-    Object.entries(config).forEach(([key, value]) => {
-      root.style.setProperty(key, String(value));
-    });
-  };
-  
-  // 初期化
-  watch(
-    () => currentTheme.value,
-    (theme) => applyTheme(theme),
-    { immediate: true }
-  );
-  
-  return {
-    currentTheme,
-    applyTheme,
-    setCustomTheme,
-    getEffectiveTheme: () => 
-      currentTheme.value === 'auto' ? systemTheme.value : currentTheme.value
-  };
-};
+    <!-- Headless + custom -->
+    <HeadlessButton class="custom-btn">Custom Button</HeadlessButton>
+  </div>
+</template>
+
+<script setup lang="ts">
+import Button from '@soave/tailwind/components/Button.vue';
+import MyButton from '@soave/variables/components/Button.vue';
+import { HeadlessButton } from '@soave/ui';
+import '@soave/variables/styles/tokens.css';
+</script>
+
+<style scoped>
+.custom-btn {
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+}
+</style>
 ```
 
 ---
 
-## Phase 6: Nuxt Module 統合（1週間）
+## Phase 5: CLI + Nuxt Module（1週間）
 
-### Step 6.1: Nuxt Module 実装
+### Step 5.1: CLI コマンド
+
+```bash
+# Headless パッケージのみ
+npx @vue-ui-composer/cli init --headless
+
+# Tailwind スタイルを含める（推奨）
+npx @vue-ui-composer/cli init --style tailwind
+
+# CSS Variables スタイルを含める
+npx @vue-ui-composer/cli init --style css-variables
+
+# 両方含める
+npx @vue-ui-composer/cli init --style both
+
+# コンポーネント追加
+npx @vue-ui-composer/cli add Button Input Card --style tailwind
+```
+
+### Step 5.2: Nuxt Module
 
 ```typescript
 // packages/nuxt/module.ts
-import { defineNuxtModule, createResolver, addPlugin, addComponentsDir } from '@nuxt/kit';
-import type { StyleAdapter } from '@vue-ui-composer/core/adapters/types';
-import { tailwindAdapter } from '@vue-ui-composer/core/adapters/tailwind';
+import { defineNuxtModule, createResolver, addComponentsDir } from '@nuxt/kit';
 
 interface ModuleOptions {
   /**
-   * Style Adapter を選択
-   * 'tailwind' | 'css-variables' | 'headless' | カスタム Adapter
+   * スタイル実装を選択
+   * - 'tailwind': @soave/tailwind を使用
+   * - 'css-variables': @soave/variables を使用
+   * - 'both': 両方を使用可能
+   * - 'headless': Core のみ（ユーザーがスタイル管理）
    */
-  adapter?: StyleAdapter | 'tailwind' | 'css-variables' | 'headless';
-  
-  /**
-   * UI 設定
-   */
-  config?: Record<string, any>;
+  style?: 'tailwind' | 'css-variables' | 'both' | 'headless';
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -1044,314 +836,228 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt: '^3.0.0'
     }
   },
-  
+
   defaults: {
-    adapter: 'tailwind'
+    style: 'tailwind'
   },
-  
+
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url);
-    
-    // ✅ CSS Variables を含める
-    if (options.adapter === 'css-variables' || 
-        (typeof options.adapter === 'object' && options.adapter.name === 'css-variables')) {
+
+    // ✅ 常に Headless コンポーネントを登録（オプション）
+    addComponentsDir({
+      path: resolve('../core/components/headless'),
+      prefix: 'Headless'
+    });
+
+    // ✅ スタイル付きコンポーネントを登録（選択可能）
+    if (options.style === 'tailwind' || options.style === 'both') {
+      addComponentsDir({
+        path: resolve('../style/components'),
+        global: true
+      });
+    }
+
+    if (options.style === 'css-variables' || options.style === 'both') {
+      addComponentsDir({
+        path: resolve('../style-css/components'),
+        prefix: options.style === 'both' ? 'CssVars' : '', // 'both' の場合はプレフィックス
+        global: true
+      });
       nuxt.options.css.push(
-        resolve('./runtime/styles/css-variables.css')
+        resolve('../style-css/styles/tokens.css')
       );
     }
-    
-    // ✅ UIProvider コンポーネントを登録
-    addComponentsDir({
-      path: resolve('./runtime/components'),
-      prefix: '',
-      global: true
-    });
-    
-    // ✅ Plugin を追加（Adapter を inject）
-    addPlugin(resolve('./runtime/plugins/ui-provider.ts'));
   }
 });
 ```
 
-### Step 6.2: Nuxt Plugin
+**使用例**:
 
 ```typescript
-// packages/nuxt/runtime/plugins/ui-provider.ts
-import { defineNuxtPlugin } from '#app';
-import { useUIProvider } from '@vue-ui-composer/core/composables/useUIConfig';
-import { 
-  tailwindAdapter, 
-  cssVariablesAdapter, 
-  headlessAdapter 
-} from '@vue-ui-composer/core/adapters';
-
-export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig().public.vueUIComposer || {};
-  
-  let adapter = tailwindAdapter;
-  
-  if (typeof config.adapter === 'string') {
-    const adapterMap = {
-      'tailwind': tailwindAdapter,
-      'css-variables': cssVariablesAdapter,
-      'headless': headlessAdapter
-    };
-    adapter = adapterMap[config.adapter as keyof typeof adapterMap] || tailwindAdapter;
-  } else if (config.adapter) {
-    adapter = config.adapter;
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: [
+    '@vue-ui-composer/nuxt'
+  ],
+  vueUIComposer: {
+    style: 'tailwind'  // または 'css-variables', 'both', 'headless'
   }
-  
-  // UIProvider を初期化
-  useUIProvider(config.config, adapter);
 });
 ```
 
 ---
 
-## Phase 7: ドキュメント・テスト（2週間）
+## パッケージ構成図
 
-### Step 7.1: ユーザーガイド
-
-```markdown
-## Style Adapter の使用方法
-
-### デフォルト（Tailwind CSS）
-
-```vue
-<template>
-  <div>
-    <Button variant="primary">送信</Button>
-  </div>
-</template>
+```
+vue-ui-composer/
+│
+├── packages/
+│   ├── core/
+│   │   ├── composables/
+│   │   │   ├── useButton.ts
+│   │   │   ├── useInput.ts
+│   │   │   ├── useDialog.ts
+│   │   │   ├── useCheckbox.ts
+│   │   │   ├── useSelect.ts
+│   │   │   ├── useForm.ts
+│   │   │   └── index.ts
+│   │   ├── components/headless/
+│   │   │   ├── Button.vue
+│   │   │   ├── Input.vue
+│   │   │   ├── Card.vue
+│   │   │   ├── Dialog.vue
+│   │   │   ├── Checkbox.vue
+│   │   │   ├── Select.vue
+│   │   │   └── index.ts
+│   │   ├── types/
+│   │   ├── utils/
+│   │   └── package.json
+│   │
+│   ├── style/                           ← Tailwind デフォルト
+│   │   ├── components/
+│   │   │   ├── Button.vue              ← HeadlessButton + Tailwind
+│   │   │   ├── Input.vue
+│   │   │   ├── Card.vue
+│   │   │   ├── Dialog.vue
+│   │   │   └── index.ts
+│   │   ├── styles/                     ← 追加スタイル（任意）
+│   │   ├── tailwind.config.js
+│   │   └── package.json
+│   │       dependencies: [@soave/ui, tailwindcss]
+│   │
+│   ├── style-css/                      ← CSS Variables 版
+│   │   ├── components/
+│   │   │   ├── Button.vue              ← HeadlessButton + BEM classes
+│   │   │   ├── Input.vue
+│   │   │   └── index.ts
+│   │   ├── styles/
+│   │   │   ├── tokens.css
+│   │   │   ├── button.css
+│   │   │   ├── input.css
+│   │   │   └── card.css
+│   │   └── package.json
+│   │       dependencies: [@soave/ui]
+│   │
+│   ├── nuxt/                           ← Nuxt Module
+│   │   ├── module.ts
+│   │   ├── runtime/
+│   │   └── package.json
+│   │
+│   └── cli/                            ← CLI ツール
+│       ├── commands/
+│       └── package.json
+│
+├── docs/
+│   ├── getting-started.md
+│   ├── choosing-styles.md
+│   ├── components/
+│   └── styling/
+│
+└── examples/
+    ├── tailwind-app/
+    ├── css-vars-app/
+    └── headless-app/
 ```
 
-### CSS Variables を使用
+---
 
-```vue
-<!-- app.vue -->
-<template>
-  <UIProvider :adapter="cssVariablesAdapter">
-    <Button variant="primary">送信</Button>
-  </UIProvider>
-</template>
+## 依存関係の明確性
 
-<script setup lang="ts">
-import { cssVariablesAdapter } from '@vue-ui-composer/core/adapters';
-</script>
-```
+### ✅ Core Package
+- 他に依存しない（独立）
+- Vue 3 のみに依存
 
-### Headless モード（スタイルなし）
+### ✅ @soave/tailwind Package
+- `@soave/ui` に依存（必須）
+- `tailwindcss` に依存（必須）
+- **Core が更新 → style は自動で対応**
 
-```vue
-<template>
-  <Button unstyled :class="myCustomClasses">送信</Button>
-</template>
+### ✅ @soave/variables Package
+- `@soave/ui` に依存（必須）
+- tailwindcss には依存しない
 
-<script setup lang="ts">
-const myCustomClasses = 'px-4 py-2 bg-blue-500 text-white rounded';
-</script>
-```
+### ✅ ユーザープロジェクト
+- Core か Style（またはその両方）のいずれかを選択
+- Core のみ → 完全にカスタマイズ
+- Style → 即座に使用可能
 
-### カスタム Adapter
+---
 
-```typescript
-import type { StyleAdapter } from '@vue-ui-composer/core/adapters/types';
+## メリット
 
-const bootstrapAdapter: StyleAdapter = {
-  name: 'bootstrap',
-  
-  getClasses(component, state) {
-    if (component === 'button') {
-      return `btn btn-${state.variant} btn-${state.size}`;
-    }
-    return '';
-  }
-};
-```
-```
+### 🎯 シンプル性
+- **概念数**: 3つ（Core, Style, Style-CSS）
+- **依存関係**: 一方向で明確
+- **LLM理解度**: 非常に高い
 
-### Step 7.2: テスト実装
+### 💪 スケーラビリティ
+- 新しいスタイルシステム追加 = 新パッケージ
+- Core は一度の実装で完了
+- Style パッケージは独立で進化可能
 
-```typescript
-// packages/core/__tests__/adapters.test.ts
-import { describe, it, expect } from 'vitest';
-import { tailwindAdapter, cssVariablesAdapter, headlessAdapter } from '../adapters';
-import type { ButtonState } from '../types/composables';
+### 🎨 柔軟性
+- Headless で完全カスタマイズ可能
+- @soave/tailwind で即座に使用
+- @soave/variables で CSS variables 活用
+- 複数スタイルを同時に使用可能
 
-describe('Style Adapters', () => {
-  describe('tailwindAdapter', () => {
-    it('should generate Tailwind classes for button', () => {
-      const state: ButtonState = {
-        variant: 'primary',
-        size: 'md',
-        disabled: false
-      };
-      
-      const classes = tailwindAdapter.getClasses('button', state);
-      expect(classes).toContain('bg-primary');
-      expect(classes).toContain('h-10');
-    });
-    
-    it('should include disabled styles when disabled', () => {
-      const state: ButtonState = {
-        variant: 'primary',
-        size: 'md',
-        disabled: true
-      };
-      
-      const classes = tailwindAdapter.getClasses('button', state);
-      expect(classes).toContain('opacity-50');
-      expect(classes).toContain('cursor-not-allowed');
-    });
-  });
-  
-  describe('cssVariablesAdapter', () => {
-    it('should generate BEM classes', () => {
-      const state: ButtonState = {
-        variant: 'primary',
-        size: 'md',
-        disabled: false
-      };
-      
-      const classes = cssVariablesAdapter.getClasses('button', state);
-      expect(classes).toBe('button button--primary button--md');
-    });
-  });
-  
-  describe('headlessAdapter', () => {
-    it('should return empty string', () => {
-      const state: ButtonState = {
-        variant: 'primary',
-        size: 'md',
-        disabled: false
-      };
-      
-      const classes = headlessAdapter.getClasses('button', state);
-      expect(classes).toBe('');
-    });
-  });
-});
-```
+### 📦 依存管理
+- **dependencies** で明示的に依存関係を宣言
+- ユーザーが安心して使用可能
+- 更新時の影響を最小化
 
 ---
 
 ## 実装チェックリスト
 
-### Phase 1: Composable の Headless 化
-- [ ] 型定義ファイル作成
-- [ ] useButton を更新
-- [ ] useInput を更新
-- [ ] useDialog を更新
-- [ ] 他の Composable を更新
-- [ ] Index ファイルを更新
-
-### Phase 2: Style Adapter System
-- [ ] Adapter インターフェース定義
-- [ ] Tailwind Adapter 実装
-- [ ] CSS Variables Adapter 実装
-- [ ] Headless Adapter 実装
-- [ ] Adapter Export
-
-### Phase 3: UIProvider 統合
-- [ ] UIConfig に Adapter 追加
-- [ ] useStyleAdapter Composable 実装
-- [ ] UIProvider コンポーネント実装
-
-### Phase 4: コンポーネント更新
-- [ ] Button コンポーネント更新
-- [ ] Input コンポーネント更新
-- [ ] Card コンポーネント更新
-- [ ] Dialog コンポーネント更新
-- [ ] Checkbox コンポーネント更新
-- [ ] Select コンポーネント更新
-
-### Phase 5: CSS Variables
-- [ ] CSS Variables Token 定義
-- [ ] useTheme Composable 実装
-- [ ] ダークモード対応
-
-### Phase 6: Nuxt Module
-- [ ] Nuxt Module 実装
-- [ ] Plugin 実装
-- [ ] CSS 読み込み設定
-
-### Phase 7: ドキュメント・テスト
-- [ ] ユーザーガイド作成
-- [ ] API リファレンス作成
+### Phase 1: Core Headless 化（2週間）
+- [ ] ButtonProps/State インターフェース定義
+- [ ] useButton, useInput, useDialog, useCheckbox, useSelect Composable
+- [ ] HeadlessButton, HeadlessInput, HeadlessCard, HeadlessDialog コンポーネント
 - [ ] テスト実装
-- [ ] 統合テスト実装
+
+### Phase 2: @soave/tailwind（1週間）
+- [ ] Button, Input, Card, Dialog Styled コンポーネント
+- [ ] Tailwind Config
+- [ ] Package.json（依存関係明記）
+- [ ] テスト
+
+### Phase 3: @soave/variables（1週間）
+- [ ] Button, Input, Card Styled コンポーネント
+- [ ] CSS Variables Token 定義
+- [ ] Component スタイルシート
+- [ ] テスト
+
+### Phase 4: 使用例（1週間）
+- [ ] Tailwind パターン
+- [ ] CSS Variables パターン
+- [ ] Headless カスタムパターン
+- [ ] Mixed パターン
+
+### Phase 5: CLI + Nuxt（1週間）
+- [ ] CLI コマンド実装
+- [ ] Nuxt Module 実装
+- [ ] ドキュメント
 
 ---
 
-## 移行ガイド（既存プロジェクト向け）
+## まとめ
 
-### v0.2 → v0.3 移行
+**完全ヘッドレス化 + スタイルパッケージ分離**
 
-**Breaking Changes:**
-- Composable の `classes` プロパティが廃止
-- コンポーネントは自動的に `styleAdapter` から classes を取得
+| 特性 | 効果 |
+|------|------|
+| **概念の シンプル性** | ⭐⭐⭐⭐⭐ |
+| **LLM親和性** | ⭐⭐⭐⭐⭐ |
+| **実装期間** | 6週間（短縮） |
+| **メンテナンス性** | ⭐⭐⭐⭐⭐ |
+| **拡張性** | ⭐⭐⭐⭐⭐ |
+| **ユーザー体験** | ⭐⭐⭐⭐⭐ |
 
-**アップデート手順:**
-
-1. **UIProvider を追加**
-```vue
-<!-- app.vue -->
-<UIProvider :adapter="tailwindAdapter">
-  <App />
-</UIProvider>
-```
-
-2. **コンポーネント側の修正は不要**（自動的に適用されます）
-
-3. **カスタムスタイルの場合**
-```vue
-<!-- 以前 -->
-<Button :class="customClass" />
-
-<!-- 以後（変更なし）-->
-<Button :class="customClass" />
-
-<!-- または新しい方法 -->
-<Button unstyled :class="customClass" />
-```
-
----
-
-## トラブルシューティング
-
-### Q: Adapter が反映されない
-
-```typescript
-// ✅ 解決策：UIProvider を最上位に配置
-<UIProvider :adapter="myAdapter">
-  <App />
-</UIProvider>
-```
-
-### Q: CSS Variables が効かない
-
-```typescript
-// ✅ 解決策：CSS ファイルが読み込まれているか確認
-import '@vue-ui-composer/core/styles/css-variables.css';
-```
-
-### Q: カスタム Adapter を作成したい
-
-```typescript
-// ✅ インターフェースに従う
-const myAdapter: StyleAdapter = {
-  name: 'my-custom',
-  getClasses(component, state) {
-    // コンポーネントと状態からクラス生成
-    return '';
-  }
-};
-```
-
----
-
-## 参考リンク
-
-- [Architecture Doc](./vue-ui-composer-arch.md)
-- [Styling Strategy](./styling_strategy.md)
-- [Adapter Types](../packages/core/adapters/types.ts)
+✅ **複雑な Adapter パターンを廃止**  
+✅ **Core と Style の責任を明確に分離**  
+✅ **依存関係を一方向で管理**  
+✅ **新しいスタイルシステムの追加が簡単**  
+✅ **shadcn/ui の自由度 + Vue 3 の力**

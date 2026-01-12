@@ -43,13 +43,14 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Checkbox as CoreCheckbox } from "@soave/ui"
-import type { CheckboxProps } from "@soave/ui"
+import type { CheckboxSize } from "@soave/ui"
 
-interface StyledCheckboxProps extends CheckboxProps {
+const props = withDefaults(defineProps<{
+    size?: CheckboxSize
+    disabled?: boolean
+    indeterminate?: boolean
     class?: string
-}
-
-const props = withDefaults(defineProps<StyledCheckboxProps>(), {
+}>(), {
     size: "md",
     disabled: false,
     indeterminate: false

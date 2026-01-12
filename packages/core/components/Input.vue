@@ -16,13 +16,19 @@
 <script setup lang="ts">
 import { toRef } from "vue"
 import { useInput } from "../../composables/useInput"
-import type { InputProps } from "../../types/input"
+import type { InputType, InputSize } from "../../types/input"
 
-interface HeadlessInputProps extends InputProps {
+const props = withDefaults(defineProps<{
+    type?: InputType
+    size?: InputSize
+    placeholder?: string
+    disabled?: boolean
+    readonly?: boolean
+    error?: string
+    error_id?: string
+    id?: string
     modelValue?: string
-}
-
-const props = withDefaults(defineProps<HeadlessInputProps>(), {
+}>(), {
     type: "text",
     size: "md",
     disabled: false,

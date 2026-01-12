@@ -26,15 +26,20 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Input as CoreInput } from "@soave/ui"
-import type { InputProps } from "@soave/ui"
+import type { InputType, InputSize } from "@soave/ui"
 
-interface StyledInputProps extends InputProps {
+const props = withDefaults(defineProps<{
+    type?: InputType
+    size?: InputSize
+    placeholder?: string
+    disabled?: boolean
+    readonly?: boolean
+    error?: string
+    error_id?: string
+    id?: string
     modelValue?: string
     class?: string
-    id?: string
-}
-
-const props = withDefaults(defineProps<StyledInputProps>(), {
+}>(), {
     type: "text",
     size: "md",
     disabled: false,

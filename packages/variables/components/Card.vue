@@ -10,13 +10,12 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Card as CoreCard } from "@soave/ui"
-import type { CardProps } from "@soave/ui"
+import type { CardPadding } from "@soave/ui"
 
-interface StyledCardProps extends CardProps {
+const props = withDefaults(defineProps<{
+    padding?: CardPadding
     class?: string
-}
-
-const props = withDefaults(defineProps<StyledCardProps>(), {
+}>(), {
     padding: "md"
 })
 

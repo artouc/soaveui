@@ -15,13 +15,13 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Switch as CoreSwitch } from "@soave/ui"
-import type { SwitchProps } from "@soave/ui"
+import type { SwitchSize } from "@soave/ui"
 
-interface StyledSwitchProps extends SwitchProps {
+const props = withDefaults(defineProps<{
+    size?: SwitchSize
+    disabled?: boolean
     class?: string
-}
-
-const props = withDefaults(defineProps<StyledSwitchProps>(), {
+}>(), {
     size: "md",
     disabled: false
 })

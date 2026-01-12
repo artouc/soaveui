@@ -15,13 +15,16 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Button as CoreButton } from "@soave/ui"
-import type { ButtonProps } from "@soave/ui"
+import type { ButtonVariant, ButtonSize, ButtonType } from "@soave/ui"
 
-interface StyledButtonProps extends ButtonProps {
+const props = withDefaults(defineProps<{
+    variant?: ButtonVariant
+    size?: ButtonSize
+    disabled?: boolean
+    loading?: boolean
+    type?: ButtonType
     class?: string
-}
-
-const props = withDefaults(defineProps<StyledButtonProps>(), {
+}>(), {
     variant: "primary",
     size: "md",
     disabled: false,

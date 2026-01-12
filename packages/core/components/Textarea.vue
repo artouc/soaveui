@@ -16,14 +16,20 @@
 <script setup lang="ts">
 import { toRef } from "vue"
 import { useTextarea } from "../../composables/useTextarea"
-import type { TextareaProps } from "../../types/textarea"
+import type { TextareaSize, TextareaResize } from "../../types/textarea"
 
-interface HeadlessTextareaProps extends TextareaProps {
+const props = withDefaults(defineProps<{
+    size?: TextareaSize
+    placeholder?: string
+    disabled?: boolean
+    readonly?: boolean
+    error?: string
+    error_id?: string
+    rows?: number
+    resize?: TextareaResize
     modelValue?: string
     id?: string
-}
-
-const props = withDefaults(defineProps<HeadlessTextareaProps>(), {
+}>(), {
     size: "md",
     disabled: false,
     readonly: false,

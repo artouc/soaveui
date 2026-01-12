@@ -26,15 +26,21 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { Textarea as CoreTextarea } from "@soave/ui"
-import type { TextareaProps } from "@soave/ui"
+import type { TextareaSize, TextareaResize } from "@soave/ui"
 
-interface StyledTextareaProps extends TextareaProps {
+const props = withDefaults(defineProps<{
+    size?: TextareaSize
+    placeholder?: string
+    disabled?: boolean
+    readonly?: boolean
+    error?: string
+    error_id?: string
+    rows?: number
+    resize?: TextareaResize
     modelValue?: string
     class?: string
     id?: string
-}
-
-const props = withDefaults(defineProps<StyledTextareaProps>(), {
+}>(), {
     size: "md",
     disabled: false,
     readonly: false,

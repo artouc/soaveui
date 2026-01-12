@@ -1,0 +1,1230 @@
+# soave UI データモデル定義
+# CLAUDE.md規則: 全てのデータモデルを記載
+
+version: "0.1.0"
+last_updated: "2026-01-12"
+
+# =============================================================================
+# 型定義 (Types)
+# =============================================================================
+
+types:
+    # ユーティリティ型
+    utils:
+        DeepPartial:
+            description: "オブジェクトの全プロパティを再帰的にオプショナルにする"
+            location: "packages/core/types/utils.ts"
+
+        RequiredKeys:
+            description: "指定したキーを必須にする"
+            location: "packages/core/types/utils.ts"
+
+        Optional:
+            description: "指定したキーをオプショナルにする"
+            location: "packages/core/types/utils.ts"
+
+        Prettify:
+            description: "型を展開して可読性を向上"
+            location: "packages/core/types/utils.ts"
+
+        MaybeRef:
+            description: "値またはRefのいずれかを受け取る"
+            location: "packages/core/types/utils.ts"
+
+        Arrayable:
+            description: "単一値または配列のいずれかを受け取る"
+            location: "packages/core/types/utils.ts"
+
+    # Buttonコンポーネント型
+    button:
+        ButtonVariant:
+            values: ["primary", "secondary", "ghost", "outline", "destructive"]
+            location: "packages/core/types/button.ts"
+
+        ButtonSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/button.ts"
+
+        ButtonProps:
+            properties:
+                variant: "ButtonVariant?"
+                size: "ButtonSize?"
+                disabled: "boolean?"
+                loading: "boolean?"
+            location: "packages/core/types/button.ts"
+
+        ButtonReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                is_disabled: "ComputedRef<boolean>"
+                is_loading: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<ButtonAriaAttributes>"
+            location: "packages/core/types/button.ts"
+
+    # Inputコンポーネント型
+    input:
+        InputSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/input.ts"
+
+        InputType:
+            values: ["text", "email", "password", "number", "tel", "url", "search"]
+            location: "packages/core/types/input.ts"
+
+        InputProps:
+            properties:
+                type: "InputType?"
+                size: "InputSize?"
+                placeholder: "string?"
+                disabled: "boolean?"
+                readonly: "boolean?"
+                error: "string?"
+                error_id: "string?"
+            location: "packages/core/types/input.ts"
+
+        InputReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                is_focused: "Ref<boolean>"
+                has_error: "ComputedRef<boolean>"
+                is_disabled: "ComputedRef<boolean>"
+                is_readonly: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<InputAriaAttributes>"
+                handleFocus: "() => void"
+                handleBlur: "() => void"
+            location: "packages/core/types/input.ts"
+
+    # Cardコンポーネント型
+    card:
+        CardPadding:
+            values: ["sm", "md", "lg", "none"]
+            location: "packages/core/types/card.ts"
+
+        CardProps:
+            properties:
+                padding: "CardPadding?"
+            location: "packages/core/types/card.ts"
+
+        CardReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+            location: "packages/core/types/card.ts"
+
+    # Dialogコンポーネント型
+    dialog:
+        DialogProps:
+            properties:
+                open: "boolean?"
+                modal: "boolean?"
+            location: "packages/core/types/dialog.ts"
+
+        DialogReturn:
+            properties:
+                is_open: "DeepReadonly<Ref<boolean>>"
+                open: "() => void"
+                close: "() => void"
+                toggle: "() => void"
+            location: "packages/core/types/dialog.ts"
+
+    # Formコンポーネント型
+    form:
+        FormState:
+            generic: "T"
+            properties:
+                values: "T"
+                errors: "Partial<Record<keyof T, string>>"
+                touched: "Partial<Record<keyof T, boolean>>"
+                is_submitting: "boolean"
+                is_dirty: "boolean"
+            location: "packages/core/types/form.ts"
+
+        FormReturn:
+            generic: "T"
+            properties:
+                values: "T"
+                errors: "DeepReadonly<Partial<Record<keyof T, string>>>"
+                touched: "DeepReadonly<Partial<Record<keyof T, boolean>>>"
+                is_valid: "ComputedRef<boolean>"
+                is_submitting: "DeepReadonly<ComputedRef<boolean>>"
+                is_dirty: "DeepReadonly<ComputedRef<boolean>>"
+                validateField: "(field: keyof T) => void"
+                validateAll: "() => boolean"
+                reset: "() => void"
+                setValues: "(values: Partial<T>) => void"
+                setFieldValue: "(field: keyof T, value: T[keyof T]) => void"
+                submit: "(on_submit: (data: T) => Promise<void>) => Promise<void>"
+                getFieldArray: "<K extends keyof T>(field: K) => FieldArrayHelpers<U>"
+            location: "packages/core/types/form.ts"
+
+        FieldArrayHelpers:
+            description: "配列フィールド操作のためのヘルパー"
+            generic: "TItem"
+            properties:
+                fields: "TItem[]"
+                append: "(value: TItem) => void"
+                prepend: "(value: TItem) => void"
+                insert: "(index: number, value: TItem) => void"
+                remove: "(index: number) => void"
+                move: "(from_index: number, to_index: number) => void"
+                swap: "(index_a: number, index_b: number) => void"
+                replace: "(index: number, value: TItem) => void"
+                clear: "() => void"
+            location: "packages/core/types/form.ts"
+
+    # Alertコンポーネント型
+    alert:
+        AlertVariant:
+            values: ["default", "info", "success", "warning", "destructive"]
+            location: "packages/core/types/alert.ts"
+
+        AlertProps:
+            properties:
+                variant: "AlertVariant?"
+            location: "packages/core/types/alert.ts"
+
+    # UIConfig型（Provider Pattern）
+    config:
+        UIConfig:
+            description: "UIコンポーネントのグローバル設定"
+            properties:
+                button: "ButtonConfig"
+                input: "InputConfig"
+                card: "CardConfig"
+                alert: "AlertConfig"
+            location: "packages/core/types/config.ts"
+
+        ButtonConfig:
+            properties:
+                default_variant: "ButtonVariant"
+                default_size: "ButtonSize"
+            location: "packages/core/types/config.ts"
+
+        InputConfig:
+            properties:
+                default_size: "InputSize"
+            location: "packages/core/types/config.ts"
+
+        CardConfig:
+            properties:
+                default_padding: "CardPadding"
+            location: "packages/core/types/config.ts"
+
+        AlertConfig:
+            properties:
+                default_variant: "AlertVariant"
+            location: "packages/core/types/config.ts"
+
+        DEFAULT_UI_CONFIG:
+            description: "デフォルトのUI設定値"
+            location: "packages/core/types/config.ts"
+
+    # Checkbox型
+    checkbox:
+        CheckboxSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/checkbox.ts"
+
+        CheckboxProps:
+            properties:
+                size: "CheckboxSize?"
+                disabled: "boolean?"
+                indeterminate: "boolean?"
+            location: "packages/core/types/checkbox.ts"
+
+        CheckboxReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                indicator_classes: "ComputedRef<string>"
+                is_disabled: "ComputedRef<boolean>"
+                is_indeterminate: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<CheckboxAriaAttributes>"
+            location: "packages/core/types/checkbox.ts"
+
+    # Radio型
+    radio:
+        RadioSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/radio.ts"
+
+        RadioGroupProps:
+            properties:
+                disabled: "boolean?"
+                orientation: "'horizontal' | 'vertical'?"
+            location: "packages/core/types/radio.ts"
+
+        RadioItemProps:
+            properties:
+                value: "string"
+                size: "RadioSize?"
+                disabled: "boolean?"
+            location: "packages/core/types/radio.ts"
+
+        RadioItemReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                indicator_classes: "ComputedRef<string>"
+                is_checked: "ComputedRef<boolean>"
+                is_disabled: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<RadioAriaAttributes>"
+            location: "packages/core/types/radio.ts"
+
+    # Switch型
+    switch:
+        SwitchSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/switch.ts"
+
+        SwitchProps:
+            properties:
+                size: "SwitchSize?"
+                disabled: "boolean?"
+            location: "packages/core/types/switch.ts"
+
+        SwitchReturn:
+            properties:
+                track_classes: "ComputedRef<string>"
+                thumb_classes: "ComputedRef<string>"
+                is_disabled: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<SwitchAriaAttributes>"
+            location: "packages/core/types/switch.ts"
+
+    # Textarea型
+    textarea:
+        TextareaProps:
+            properties:
+                placeholder: "string?"
+                disabled: "boolean?"
+                readonly: "boolean?"
+                error: "string?"
+                error_id: "string?"
+                rows: "number?"
+                resize: "'none' | 'vertical' | 'horizontal' | 'both'?"
+            location: "packages/core/types/textarea.ts"
+
+        TextareaReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                is_focused: "Ref<boolean>"
+                has_error: "ComputedRef<boolean>"
+                is_disabled: "ComputedRef<boolean>"
+                is_readonly: "ComputedRef<boolean>"
+                aria_attributes: "ComputedRef<TextareaAriaAttributes>"
+                handleFocus: "() => void"
+                handleBlur: "() => void"
+            location: "packages/core/types/textarea.ts"
+
+    # Select型
+    select:
+        SelectSize:
+            values: ["sm", "md", "lg"]
+            location: "packages/core/types/select.ts"
+
+        SelectProps:
+            properties:
+                size: "SelectSize?"
+                disabled: "boolean?"
+                placeholder: "string?"
+            location: "packages/core/types/select.ts"
+
+        SelectContext:
+            description: "Selectコンポーネント群のContext"
+            properties:
+                model_value: "Ref<string>"
+                is_open: "Ref<boolean>"
+                disabled: "Ref<boolean>"
+                size: "Ref<SelectSize>"
+                placeholder: "Ref<string>"
+                updateValue: "(value: string) => void"
+                open: "() => void"
+                close: "() => void"
+                toggle: "() => void"
+            location: "packages/core/types/select.ts"
+
+    # FileInput型
+    file_input:
+        FileInputProps:
+            properties:
+                accept: "string?"
+                multiple: "boolean?"
+                disabled: "boolean?"
+                max_size: "number?"
+                max_files: "number?"
+            location: "packages/core/types/file-input.ts"
+
+        FileInfo:
+            properties:
+                file: "File"
+                name: "string"
+                size: "number"
+                type: "string"
+                preview_url: "string | null"
+            location: "packages/core/types/file-input.ts"
+
+        FileInputReturn:
+            properties:
+                base_classes: "ComputedRef<string>"
+                dropzone_classes: "ComputedRef<string>"
+                is_disabled: "ComputedRef<boolean>"
+                is_dragging: "Ref<boolean>"
+                files: "Ref<FileInfo[]>"
+                error: "Ref<string | null>"
+                aria_attributes: "ComputedRef<FileInputAriaAttributes>"
+                handleFiles: "(file_list: FileList | null) => void"
+                handleDragEnter: "(event: DragEvent) => void"
+                handleDragLeave: "(event: DragEvent) => void"
+                handleDrop: "(event: DragEvent) => void"
+                removeFile: "(index: number) => void"
+                clearFiles: "() => void"
+                openFilePicker: "() => void"
+            location: "packages/core/types/file-input.ts"
+
+    # =========================================================================
+    # Phase 4: Advanced Component Types
+    # =========================================================================
+
+    # Toast型
+    toast:
+        ToastVariant:
+            values: ["default", "success", "error", "warning", "info"]
+            location: "packages/core/types/toast.ts"
+
+        ToastPosition:
+            values: ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"]
+            location: "packages/core/types/toast.ts"
+
+        ToastProps:
+            properties:
+                id: "string?"
+                title: "string?"
+                description: "string?"
+                variant: "ToastVariant?"
+                duration: "number?"
+                dismissible: "boolean?"
+                action: "ToastAction?"
+            location: "packages/core/types/toast.ts"
+
+        ToasterProps:
+            properties:
+                position: "ToastPosition?"
+                max_toasts: "number?"
+                gap: "number?"
+            location: "packages/core/types/toast.ts"
+
+    # Tooltip型
+    tooltip:
+        TooltipSide:
+            values: ["top", "right", "bottom", "left"]
+            location: "packages/core/types/tooltip.ts"
+
+        TooltipAlign:
+            values: ["start", "center", "end"]
+            location: "packages/core/types/tooltip.ts"
+
+        TooltipProps:
+            properties:
+                content: "string"
+                side: "TooltipSide?"
+                align: "TooltipAlign?"
+                delay_duration: "number?"
+                disabled: "boolean?"
+            location: "packages/core/types/tooltip.ts"
+
+    # Popover型
+    popover:
+        PopoverSide:
+            values: ["top", "right", "bottom", "left"]
+            location: "packages/core/types/popover.ts"
+
+        PopoverAlign:
+            values: ["start", "center", "end"]
+            location: "packages/core/types/popover.ts"
+
+        PopoverProps:
+            properties:
+                side: "PopoverSide?"
+                align: "PopoverAlign?"
+                modal: "boolean?"
+            location: "packages/core/types/popover.ts"
+
+    # Dropdown型
+    dropdown:
+        DropdownSide:
+            values: ["top", "right", "bottom", "left"]
+            location: "packages/core/types/dropdown.ts"
+
+        DropdownAlign:
+            values: ["start", "center", "end"]
+            location: "packages/core/types/dropdown.ts"
+
+        DropdownItemProps:
+            properties:
+                disabled: "boolean?"
+                destructive: "boolean?"
+            location: "packages/core/types/dropdown.ts"
+
+    # Sheet型
+    sheet:
+        SheetSide:
+            values: ["top", "right", "bottom", "left"]
+            location: "packages/core/types/sheet.ts"
+
+        SheetProps:
+            properties:
+                open: "boolean?"
+                side: "SheetSide?"
+            location: "packages/core/types/sheet.ts"
+
+    # Theme型
+    theme:
+        ThemeMode:
+            values: ["light", "dark", "system"]
+            location: "packages/core/types/theme.ts"
+
+        ThemeColors:
+            description: "テーマカラー定義（HSL形式）"
+            properties:
+                background: "string"
+                foreground: "string"
+                primary: "string"
+                primary_foreground: "string"
+                secondary: "string"
+                secondary_foreground: "string"
+                muted: "string"
+                muted_foreground: "string"
+                accent: "string"
+                accent_foreground: "string"
+                destructive: "string"
+                destructive_foreground: "string"
+                border: "string"
+                input: "string"
+                ring: "string"
+            location: "packages/core/types/theme.ts"
+
+        ThemeConfig:
+            properties:
+                default_mode: "ThemeMode"
+                storage_key: "string"
+                attribute: "string"
+                themes: "Theme[]"
+            location: "packages/core/types/theme.ts"
+
+# =============================================================================
+# Composables
+# =============================================================================
+
+composables:
+    useButton:
+        description: "Buttonコンポーネントのロジックを提供"
+        input: "Ref<ButtonProps>"
+        output: "ButtonReturn"
+        location: "packages/core/composables/useButton.ts"
+
+    useInput:
+        description: "Inputコンポーネントのロジックを提供"
+        input: "Ref<InputProps>"
+        output: "InputReturn"
+        location: "packages/core/composables/useInput.ts"
+
+    useCard:
+        description: "Cardコンポーネントのロジックを提供"
+        input: "Ref<CardProps>"
+        output: "CardReturn"
+        location: "packages/core/composables/useCard.ts"
+
+    useDialog:
+        description: "Dialogの状態管理を提供"
+        input: "なし"
+        output: "DialogReturn"
+        location: "packages/core/composables/useDialog.ts"
+
+    useForm:
+        description: "Zodスキーマベースのフォーム状態管理"
+        input: "ZodSchema"
+        output: "FormReturn<z.infer<T>>"
+        location: "packages/core/composables/useForm.ts"
+
+    useUIProvider:
+        description: "UIProviderで設定を提供する"
+        input: "DeepPartial<UIConfig>"
+        output: "UIConfig"
+        location: "packages/core/composables/useUIConfig.ts"
+
+    useUI:
+        description: "コンポーネント固有の設定を取得する"
+        input: "keyof UIConfig (button | input | card | alert)"
+        output: "Readonly<UIConfig[K]>"
+        location: "packages/core/composables/useUIConfig.ts"
+
+    useUIConfig:
+        description: "全体のUI設定を取得する"
+        input: "なし"
+        output: "Readonly<UIConfig>"
+        location: "packages/core/composables/useUIConfig.ts"
+
+    useCheckbox:
+        description: "Checkboxコンポーネントのロジックを提供"
+        input: "Ref<CheckboxProps>, Ref<boolean>"
+        output: "CheckboxReturn"
+        location: "packages/core/composables/useCheckbox.ts"
+
+    useRadioItem:
+        description: "RadioItemコンポーネントのロジックを提供"
+        input: "Ref<RadioItemProps>"
+        output: "RadioItemReturn"
+        location: "packages/core/composables/useRadio.ts"
+
+    useSwitch:
+        description: "Switchコンポーネントのロジックを提供"
+        input: "Ref<SwitchProps>, Ref<boolean>"
+        output: "SwitchReturn"
+        location: "packages/core/composables/useSwitch.ts"
+
+    useTextarea:
+        description: "Textareaコンポーネントのロジックを提供"
+        input: "Ref<TextareaProps>"
+        output: "TextareaReturn"
+        location: "packages/core/composables/useTextarea.ts"
+
+    useSelectTrigger:
+        description: "SelectTriggerコンポーネントのロジックを提供"
+        input: "なし (Contextから取得)"
+        output: "SelectTriggerReturn"
+        location: "packages/core/composables/useSelect.ts"
+
+    useSelectContent:
+        description: "SelectContentコンポーネントのロジックを提供"
+        input: "なし"
+        output: "SelectContentReturn"
+        location: "packages/core/composables/useSelect.ts"
+
+    useSelectItem:
+        description: "SelectItemコンポーネントのロジックを提供"
+        input: "Ref<{ value: string; disabled?: boolean }>"
+        output: "SelectItemReturn"
+        location: "packages/core/composables/useSelect.ts"
+
+    useFileInput:
+        description: "FileInputコンポーネントのロジックを提供"
+        input: "Ref<FileInputProps>, Ref<HTMLInputElement | null>"
+        output: "FileInputReturn"
+        location: "packages/core/composables/useFileInput.ts"
+
+    # Phase 4 Composables
+    useToast:
+        description: "Toast通知の状態管理"
+        input: "なし"
+        output: "ToastReturn"
+        location: "packages/core/composables/useToast.ts"
+
+    toast:
+        description: "Toast通知のショートカット関数群"
+        methods: ["default", "success", "error", "warning", "info", "dismiss", "dismissAll"]
+        location: "packages/core/composables/useToast.ts"
+
+    useTooltip:
+        description: "Tooltipコンポーネントのロジックを提供"
+        input: "Ref<UseTooltipProps>"
+        output: "UseTooltipReturn"
+        location: "packages/core/composables/useTooltip.ts"
+
+    usePopover:
+        description: "Popoverコンポーネントのロジックを提供"
+        input: "Ref<UsePopoverProps>"
+        output: "UsePopoverReturn"
+        location: "packages/core/composables/usePopover.ts"
+
+    useDropdown:
+        description: "DropdownMenuコンポーネントのロジックを提供"
+        input: "Ref<UseDropdownProps>"
+        output: "UseDropdownReturn"
+        location: "packages/core/composables/useDropdown.ts"
+
+    useTheme:
+        description: "テーマ切り替え（ライト/ダーク/システム）の状態管理"
+        input: "UseThemeOptions"
+        output: "UseThemeReturn"
+        location: "packages/core/composables/useTheme.ts"
+
+    generateThemeCSS:
+        description: "テーマカラーからCSS変数を生成"
+        input: "light: ThemeColors, dark: ThemeColors"
+        output: "string"
+        location: "packages/core/composables/useTheme.ts"
+
+# =============================================================================
+# Components
+# =============================================================================
+
+components:
+    # Provider
+    UIProvider:
+        description: "UI設定を提供するProviderコンポーネント"
+        composable: "useUIProvider"
+        props: "{ config?: DeepPartial<UIConfig> }"
+        slots: ["default"]
+        location: "packages/core/components/ui/UIProvider.vue"
+
+    # 基本コンポーネント
+    Button:
+        composable: "useButton"
+        props: "ButtonProps"
+        slots: ["default", "icon-left", "icon-right", "loading"]
+        emits: ["click"]
+        location: "packages/core/components/ui/Button.vue"
+
+    Input:
+        composable: "useInput"
+        props: "InputProps & { id?, modelValue? }"
+        emits: ["update:modelValue", "blur"]
+        location: "packages/core/components/ui/Input.vue"
+
+    # Cardコンポーネント群
+    Card:
+        composable: "useCard"
+        props: "CardProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/Card.vue"
+
+    CardHeader:
+        props: "CardHeaderProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/CardHeader.vue"
+
+    CardTitle:
+        props: "CardTitleProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/CardTitle.vue"
+
+    CardDescription:
+        props: "CardDescriptionProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/CardDescription.vue"
+
+    CardContent:
+        props: "CardContentProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/CardContent.vue"
+
+    CardFooter:
+        props: "CardFooterProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/CardFooter.vue"
+
+    # Alertコンポーネント群
+    Alert:
+        props: "AlertProps & { class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/Alert.vue"
+
+    AlertTitle:
+        props: "AlertTitleProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/AlertTitle.vue"
+
+    AlertDescription:
+        props: "AlertDescriptionProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/AlertDescription.vue"
+
+    # Dialogコンポーネント群
+    Dialog:
+        props: "{ open?, modal?, showCloseButton? }"
+        emits: ["update:open"]
+        slots: ["default"]
+        provides: "DialogContext"
+        location: "packages/core/components/ui/Dialog.vue"
+
+    DialogHeader:
+        props: "DialogHeaderProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/DialogHeader.vue"
+
+    DialogTitle:
+        props: "DialogTitleProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/DialogTitle.vue"
+
+    DialogDescription:
+        props: "DialogDescriptionProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/DialogDescription.vue"
+
+    DialogFooter:
+        props: "DialogFooterProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/DialogFooter.vue"
+
+    # Formコンポーネント群
+    FormField:
+        props: "FormFieldProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/FormField.vue"
+
+    FormLabel:
+        props: "FormLabelProps"
+        slots: ["default"]
+        location: "packages/core/components/ui/FormLabel.vue"
+
+    FormInput:
+        composable: "useInput (via Input)"
+        props: "InputProps & { id?, modelValue?, class? }"
+        emits: ["update:modelValue", "blur"]
+        location: "packages/core/components/ui/FormInput.vue"
+
+    FormError:
+        props: "FormErrorProps & { id? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/FormError.vue"
+
+    # Checkboxコンポーネント
+    Checkbox:
+        composable: "useCheckbox"
+        props: "CheckboxProps & { modelValue? }"
+        emits: ["update:modelValue"]
+        location: "packages/core/components/ui/Checkbox.vue"
+
+    # Radioコンポーネント群
+    RadioGroup:
+        props: "RadioGroupProps & { modelValue? }"
+        emits: ["update:modelValue"]
+        slots: ["default"]
+        provides: "RadioGroupContext"
+        location: "packages/core/components/ui/RadioGroup.vue"
+
+    RadioItem:
+        composable: "useRadioItem"
+        props: "RadioItemProps"
+        location: "packages/core/components/ui/RadioItem.vue"
+
+    # Switchコンポーネント
+    Switch:
+        composable: "useSwitch"
+        props: "SwitchProps & { modelValue? }"
+        emits: ["update:modelValue"]
+        location: "packages/core/components/ui/Switch.vue"
+
+    # Textareaコンポーネント
+    Textarea:
+        composable: "useTextarea"
+        props: "TextareaProps & { id?, modelValue? }"
+        emits: ["update:modelValue", "blur"]
+        location: "packages/core/components/ui/Textarea.vue"
+
+    # Selectコンポーネント群
+    Select:
+        props: "SelectProps & { modelValue? }"
+        emits: ["update:modelValue"]
+        slots: ["default"]
+        provides: "SelectContext"
+        location: "packages/core/components/ui/Select.vue"
+
+    SelectTrigger:
+        composable: "useSelectTrigger"
+        slots: ["default"]
+        location: "packages/core/components/ui/SelectTrigger.vue"
+
+    SelectValue:
+        slots: ["default"]
+        location: "packages/core/components/ui/SelectValue.vue"
+
+    SelectContent:
+        composable: "useSelectContent"
+        slots: ["default"]
+        location: "packages/core/components/ui/SelectContent.vue"
+
+    SelectItem:
+        composable: "useSelectItem"
+        props: "{ value: string, disabled?: boolean }"
+        slots: ["default"]
+        location: "packages/core/components/ui/SelectItem.vue"
+
+    # FileInputコンポーネント
+    FileInput:
+        composable: "useFileInput"
+        props: "FileInputProps & { modelValue? }"
+        emits: ["update:modelValue"]
+        slots: ["dropzone"]
+        location: "packages/core/components/ui/FileInput.vue"
+
+    # FormTextareaコンポーネント
+    FormTextarea:
+        composable: "useTextarea (via Textarea)"
+        props: "TextareaProps & { id?, modelValue?, class? }"
+        emits: ["update:modelValue", "blur"]
+        location: "packages/core/components/ui/FormTextarea.vue"
+
+    # =========================================================================
+    # Phase 4: Advanced Components
+    # =========================================================================
+
+    # Toastコンポーネント群
+    Toast:
+        composable: "useToast"
+        props: "ToastProps"
+        emits: ["dismiss"]
+        location: "packages/core/components/ui/Toast.vue"
+
+    Toaster:
+        description: "Toast通知のコンテナコンポーネント"
+        composable: "useToast"
+        props: "ToasterProps"
+        location: "packages/core/components/ui/Toaster.vue"
+
+    # Tooltipコンポーネント群
+    Tooltip:
+        composable: "useTooltip"
+        props: "TooltipProps"
+        slots: ["default"]
+        provides: "TooltipContext"
+        location: "packages/core/components/ui/Tooltip.vue"
+
+    TooltipTrigger:
+        slots: ["default"]
+        location: "packages/core/components/ui/TooltipTrigger.vue"
+
+    TooltipContent:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/TooltipContent.vue"
+
+    # Popoverコンポーネント群
+    Popover:
+        composable: "usePopover"
+        props: "PopoverProps"
+        slots: ["default"]
+        provides: "PopoverContext"
+        location: "packages/core/components/ui/Popover.vue"
+
+    PopoverTrigger:
+        slots: ["default"]
+        location: "packages/core/components/ui/PopoverTrigger.vue"
+
+    PopoverContent:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/PopoverContent.vue"
+
+    # DropdownMenuコンポーネント群
+    DropdownMenu:
+        composable: "useDropdown"
+        props: "DropdownProps"
+        slots: ["default"]
+        provides: "DropdownContext"
+        location: "packages/core/components/ui/DropdownMenu.vue"
+
+    DropdownMenuTrigger:
+        slots: ["default"]
+        location: "packages/core/components/ui/DropdownMenuTrigger.vue"
+
+    DropdownMenuContent:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/DropdownMenuContent.vue"
+
+    DropdownMenuItem:
+        props: "DropdownItemProps"
+        emits: ["select"]
+        slots: ["default"]
+        location: "packages/core/components/ui/DropdownMenuItem.vue"
+
+    DropdownMenuSeparator:
+        props: "{ class? }"
+        location: "packages/core/components/ui/DropdownMenuSeparator.vue"
+
+    DropdownMenuLabel:
+        props: "{ inset?, class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/DropdownMenuLabel.vue"
+
+    # Sheetコンポーネント群
+    Sheet:
+        props: "SheetProps"
+        emits: ["update:open"]
+        slots: ["default"]
+        provides: "SheetContext"
+        location: "packages/core/components/ui/Sheet.vue"
+
+    SheetHeader:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/SheetHeader.vue"
+
+    SheetTitle:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/SheetTitle.vue"
+
+    SheetDescription:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/SheetDescription.vue"
+
+    SheetFooter:
+        props: "{ class? }"
+        slots: ["default"]
+        location: "packages/core/components/ui/SheetFooter.vue"
+
+# =============================================================================
+# Utils
+# =============================================================================
+
+utils:
+    cn:
+        description: "clsx + tailwind-mergeでクラス名をマージ"
+        input: "ClassValue[]"
+        output: "string"
+        location: "packages/core/utils/cn.ts"
+
+    deepMerge:
+        description: "オブジェクトを深層マージ"
+        input: "target: T, source: DeepPartial<T>"
+        output: "T"
+        location: "packages/core/utils/deepMerge.ts"
+
+# =============================================================================
+# Constants
+# =============================================================================
+
+constants:
+    errors:
+        FORM_ERRORS:
+            - FIELD_NOT_FOUND
+            - VALIDATION_FAILED
+            - SUBMIT_FAILED
+            - SCHEMA_INVALID
+        COMPONENT_ERRORS:
+            - INVALID_VARIANT
+            - INVALID_SIZE
+            - PROVIDER_NOT_FOUND
+        DIALOG_ERRORS:
+            - ALREADY_OPEN
+            - ALREADY_CLOSED
+        INPUT_ERRORS:
+            - INVALID_TYPE
+        location: "packages/core/constants/errors.ts"
+
+    logs:
+        FORM_LOGS:
+            - FIELD_VALIDATED
+            - FORM_SUBMITTED
+            - FORM_RESET
+            - VALIDATION_STARTED
+        COMPONENT_LOGS:
+            - DIALOG_OPENED
+            - DIALOG_CLOSED
+            - BUTTON_CLICKED
+            - INPUT_FOCUSED
+            - INPUT_BLURRED
+        CONFIG_LOGS:
+            - PROVIDER_INITIALIZED
+            - CONFIG_UPDATED
+        location: "packages/core/constants/logs.ts"
+
+# =============================================================================
+# @soave/nuxt-ui - Nuxt Module (Phase 3)
+# =============================================================================
+
+nuxt_module:
+    package_name: "@soave/nuxt-ui"
+    version: "0.1.0"
+    location: "packages/nuxt"
+
+    # モジュールオプション
+    options:
+        SoaveNuxtModuleOptions:
+            properties:
+                prefix: "string?"
+                global: "boolean?"
+                i18n: "{ enabled?: boolean, default_locale?: string }?"
+            location: "packages/nuxt/src/types.ts"
+
+    # Nuxt固有の型
+    types:
+        BreadcrumbItem:
+            properties:
+                label: "string"
+                href: "string?"
+                icon: "string?"
+                disabled: "boolean?"
+                current: "boolean?"
+            location: "packages/nuxt/src/types.ts"
+
+        PaginationState:
+            properties:
+                current_page: "number"
+                total_pages: "number"
+                total_items: "number"
+                per_page: "number"
+                has_previous: "boolean"
+                has_next: "boolean"
+            location: "packages/nuxt/src/types.ts"
+
+        TableColumn:
+            generic: "T"
+            properties:
+                key: "keyof T | string"
+                label: "string"
+                sortable: "boolean?"
+                width: "string?"
+                align: "'left' | 'center' | 'right'?"
+                render: "(value: unknown, row: T) => string"
+            location: "packages/nuxt/src/types.ts"
+
+        TableSortState:
+            properties:
+                column: "string"
+                direction: "'asc' | 'desc'"
+            location: "packages/nuxt/src/types.ts"
+
+        DataTableOptions:
+            generic: "T"
+            properties:
+                columns: "TableColumn<T>[]"
+                data: "T[]"
+                sortable: "boolean?"
+                selectable: "boolean?"
+                pagination: "boolean?"
+                per_page: "number?"
+            location: "packages/nuxt/src/types.ts"
+
+        RouteTypedParams:
+            properties:
+                params: "Record<string, string>"
+                query: "Record<string, string | string[]>"
+            location: "packages/nuxt/src/types.ts"
+
+        UITranslations:
+            description: "i18n用の翻訳定義"
+            properties:
+                pagination: "{ previous, next, first, last, page, showing, of, results }"
+                data_table: "{ no_results, select_all, select_row, actions, loading, sort_ascending, sort_descending }"
+                breadcrumbs: "{ home, navigation }"
+                common: "{ loading, error, empty, cancel, confirm, save, delete, edit, create, search, filter, clear, close, open, submit, reset }"
+            location: "packages/nuxt/src/runtime/composables/useI18nUI.ts"
+
+    # Composables
+    composables:
+        defineRoute:
+            description: "型付きルートを定義する"
+            generic: "TParams, TQuery"
+            output: "TypedRoute<TParams, TQuery>"
+            location: "packages/nuxt/src/runtime/composables/useTypedRoute.ts"
+
+        useTypedParams:
+            description: "型付きパラメータを取得する"
+            generic: "T"
+            output: "ComputedRef<T>"
+            location: "packages/nuxt/src/runtime/composables/useTypedRoute.ts"
+
+        useTypedQuery:
+            description: "型付きクエリを取得する"
+            generic: "T"
+            output: "ComputedRef<T>"
+            location: "packages/nuxt/src/runtime/composables/useTypedRoute.ts"
+
+        useParam:
+            description: "単一のルートパラメータを取得する"
+            input: "key: string"
+            output: "ComputedRef<T | undefined>"
+            location: "packages/nuxt/src/runtime/composables/useTypedRoute.ts"
+
+        useQueryParam:
+            description: "単一のクエリパラメータを取得する"
+            input: "key: string"
+            output: "ComputedRef<T | undefined>"
+            location: "packages/nuxt/src/runtime/composables/useTypedRoute.ts"
+
+        useBreadcrumbs:
+            description: "パンくずリストの自動生成と管理"
+            input: "UseBreadcrumbsOptions"
+            output: "UseBreadcrumbsReturn"
+            location: "packages/nuxt/src/runtime/composables/useBreadcrumbs.ts"
+
+        useSoaveSeoMeta:
+            description: "SEOメタタグの設定（Nuxt useSeoMetaのラッパー）"
+            input: "SoaveSeoMetaOptions"
+            output: "void"
+            location: "packages/nuxt/src/runtime/composables/useSoaveSeoMeta.ts"
+
+        useStructuredData:
+            description: "構造化データ(JSON-LD)の設定"
+            input: "StructuredDataOptions"
+            output: "void"
+            location: "packages/nuxt/src/runtime/composables/useSoaveSeoMeta.ts"
+
+        usePagination:
+            description: "ページネーションの状態管理"
+            input: "UsePaginationOptions"
+            output: "UsePaginationReturn"
+            location: "packages/nuxt/src/runtime/composables/usePagination.ts"
+
+        useI18nUI:
+            description: "UIコンポーネント用の翻訳を取得"
+            input: "UseI18nUIOptions"
+            output: "UseI18nUIReturn"
+            location: "packages/nuxt/src/runtime/composables/useI18nUI.ts"
+
+    # Components
+    components:
+        Breadcrumbs:
+            description: "パンくずリストコンポーネント"
+            props: "{ items: BreadcrumbItem[], separator?, aria_label?, class? }"
+            slots: ["icon", "item", "separator"]
+            location: "packages/nuxt/src/runtime/components/Breadcrumbs.vue"
+
+        Pagination:
+            description: "ページネーションコンポーネント"
+            props: "{ state: PaginationState, pages, size?, show_first_last?, aria_label?, ... }"
+            emits: ["page", "previous", "next", "first", "last"]
+            slots: ["first-icon", "previous-icon", "next-icon", "last-icon", "ellipsis"]
+            location: "packages/nuxt/src/runtime/components/Pagination.vue"
+
+        Table:
+            description: "基本テーブルコンポーネント"
+            props: "{ class?, wrapper_class? }"
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/Table.vue"
+
+        TableHeader:
+            props: "{ class? }"
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/TableHeader.vue"
+
+        TableBody:
+            props: "{ class? }"
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/TableBody.vue"
+
+        TableRow:
+            props: "{ selected?, class? }"
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/TableRow.vue"
+
+        TableHead:
+            props: "{ sortable?, sort_direction?, class? }"
+            emits: ["sort"]
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/TableHead.vue"
+
+        TableCell:
+            props: "{ class? }"
+            slots: ["default"]
+            location: "packages/nuxt/src/runtime/components/TableCell.vue"
+
+        DataTable:
+            description: "高機能データテーブルコンポーネント"
+            generic: "T"
+            props: "DataTableProps<T>"
+            emits: ["sort", "select", "page-change"]
+            slots: ["header", "empty", "footer", "actions", "header-*", "cell-*", "pagination-info"]
+            location: "packages/nuxt/src/runtime/components/DataTable.vue"
+
+    # Plugins
+    plugins:
+        ui-provider.client:
+            description: "クライアントサイドでUIProviderを初期化"
+            location: "packages/nuxt/src/runtime/plugins/ui-provider.client.ts"
+
+        ui-provider.server:
+            description: "サーバーサイドでUIProviderを初期化（SSR対応）"
+            location: "packages/nuxt/src/runtime/plugins/ui-provider.server.ts"

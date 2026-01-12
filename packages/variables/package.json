@@ -1,6 +1,6 @@
 {
     "name": "@soave/variables",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "CSS Variables styled components for soave UI",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",
@@ -40,7 +40,7 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
-        "@soave/ui": "^0.4.0"
+        "@soave/ui": "^0.5.0"
     },
     "peerDependencies": {
         "vue": "^3.4.0"

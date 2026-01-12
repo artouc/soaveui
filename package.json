@@ -1,7 +1,7 @@
 {
     "name": "@soave/ui-monorepo",
     "private": true,
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "soave UI - Composable-First UI Framework for Vue 3 / Nuxt 4",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",

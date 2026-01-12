@@ -26,18 +26,24 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, provide } from "vue"
+import type { Ref, InjectionKey } from "vue"
 import { useDialog } from "../../composables/useDialog"
-import { DIALOG_KEY } from "../../types/dialog"
-import type { DialogContext } from "../../types/dialog"
 
-interface HeadlessDialogProps {
-    closeOnOverlay?: boolean
-    closeOnEscape?: boolean
+interface DialogContext {
+    is_open: Ref<boolean>
+    close: () => void
     titleId?: string
     descriptionId?: string
 }
 
-const props = withDefaults(defineProps<HeadlessDialogProps>(), {
+const DIALOG_KEY: InjectionKey<DialogContext> = Symbol("dialog")
+
+const props = withDefaults(defineProps<{
+    closeOnOverlay?: boolean
+    closeOnEscape?: boolean
+    titleId?: string
+    descriptionId?: string
+}>(), {
     closeOnOverlay: true,
     closeOnEscape: true
 })

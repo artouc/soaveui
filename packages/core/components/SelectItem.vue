@@ -15,19 +15,36 @@
 
 <script setup lang="ts">
 import { inject, toRef } from "vue"
+import type { Ref, ComputedRef, InjectionKey } from "vue"
 import { useSelectItem } from "../../composables/useSelect"
-import type { SelectContext, SelectItemProps } from "../../types/select"
-import { SELECT_KEY } from "../../types/select"
-import { COMPONENT_ERRORS } from "../../constants/errors"
 
-const props = withDefaults(defineProps<SelectItemProps>(), {
+interface SelectContext {
+    model_value: Ref<string>
+    is_open: Ref<boolean>
+    disabled: ComputedRef<boolean>
+    size: ComputedRef<"sm" | "md" | "lg">
+    placeholder: ComputedRef<string>
+    trigger_ref: Ref<HTMLElement | null>
+    updateValue: (value: string) => void
+    open: () => void
+    close: () => void
+    toggle: () => void
+    setTriggerRef: (element: HTMLElement | null) => void
+}
+
+const SELECT_KEY: InjectionKey<SelectContext> = Symbol("select")
+
+const props = withDefaults(defineProps<{
+    value: string
+    disabled?: boolean
+}>(), {
     disabled: false
 })
 
 const context = inject<SelectContext | null>(SELECT_KEY, null)
 
 if (!context) {
-    throw new Error(COMPONENT_ERRORS.PROVIDER_NOT_FOUND)
+    throw new Error("SelectItem must be used within Select")
 }
 
 const composable = useSelectItem(toRef(() => ({ value: props.value, disabled: props.disabled })))

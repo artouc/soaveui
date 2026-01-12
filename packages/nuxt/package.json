@@ -1,6 +1,6 @@
 {
     "name": "@soave/nuxt-ui",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "Nuxt module for soave UI - Deep Nuxt integration with SSR, i18n, and routing support",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",

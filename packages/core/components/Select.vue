@@ -12,10 +12,29 @@
 
 <script setup lang="ts">
 import { ref, provide, watch, onMounted, onUnmounted, computed } from "vue"
-import type { SelectProps, SelectContext } from "../../types/select"
-import { SELECT_KEY } from "../../types/select"
+import type { Ref, ComputedRef, InjectionKey } from "vue"
 
-const props = withDefaults(defineProps<SelectProps>(), {
+interface SelectContext {
+    model_value: Ref<string>
+    is_open: Ref<boolean>
+    disabled: ComputedRef<boolean>
+    size: ComputedRef<"sm" | "md" | "lg">
+    placeholder: ComputedRef<string>
+    trigger_ref: Ref<HTMLElement | null>
+    updateValue: (value: string) => void
+    open: () => void
+    close: () => void
+    toggle: () => void
+    setTriggerRef: (element: HTMLElement | null) => void
+}
+
+const SELECT_KEY: InjectionKey<SelectContext> = Symbol("select")
+
+const props = withDefaults(defineProps<{
+    size?: "sm" | "md" | "lg"
+    disabled?: boolean
+    placeholder?: string
+}>(), {
     size: "md",
     disabled: false,
     placeholder: ""

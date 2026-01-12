@@ -1,6 +1,6 @@
 {
     "name": "@soave/tailwind",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Tailwind CSS styled components for soave UI",
     "author": "Arata Ouchi (Original SIN Architecture)",
     "license": "MIT",

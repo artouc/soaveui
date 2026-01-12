@@ -12,9 +12,14 @@
 <script setup lang="ts">
 import { toRef } from "vue"
 import { useButton } from "../../composables/useButton"
-import type { ButtonProps } from "../../types/button"
 
-const props = withDefaults(defineProps<ButtonProps>(), {
+const props = withDefaults(defineProps<{
+    variant?: "primary" | "secondary" | "outline" | "ghost" | "destructive"
+    size?: "sm" | "md" | "lg"
+    disabled?: boolean
+    loading?: boolean
+    type?: "button" | "submit" | "reset"
+}>(), {
     variant: "primary",
     size: "md",
     disabled: false,

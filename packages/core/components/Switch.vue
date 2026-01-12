@@ -15,9 +15,11 @@
 <script setup lang="ts">
 import { toRef } from "vue"
 import { useSwitch } from "../../composables/useSwitch"
-import type { SwitchProps } from "../../types/switch"
 
-const props = withDefaults(defineProps<SwitchProps>(), {
+const props = withDefaults(defineProps<{
+    size?: "sm" | "md" | "lg"
+    disabled?: boolean
+}>(), {
     size: "md",
     disabled: false
 })

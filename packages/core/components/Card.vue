@@ -7,9 +7,10 @@
 <script setup lang="ts">
 import { toRef } from "vue"
 import { useCard } from "../../composables/useCard"
-import type { CardProps } from "../../types/card"
 
-const props = withDefaults(defineProps<CardProps>(), {
+const props = withDefaults(defineProps<{
+    padding?: "none" | "sm" | "md" | "lg"
+}>(), {
     padding: "md"
 })
 

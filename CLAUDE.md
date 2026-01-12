@@ -33,3 +33,4 @@
 3. 一括置換が望ましい場合、`temp/`内に`.js`スクリプトを記載して実行することでコードを修正し、使用し終わったらスクリプトを削除する
 4. バックグラウンドで`npm run dev`を実行せず、必ずユーザーに実行を促す
 5. ESLint, Prittierを導入して適宜フォーマットコマンドを実行する
+6. バグを修正したら、`packages/core`、`packages/tailwind`、`packages/variables`、`packages/nuxt`に同様の問題がないか必ず点検する

@@ -14,9 +14,12 @@
 <script setup lang="ts">
 import { toRef, computed } from "vue"
 import { useCheckbox } from "../../composables/useCheckbox"
-import type { CheckboxProps } from "../../types/checkbox"
 
-const props = withDefaults(defineProps<CheckboxProps>(), {
+const props = withDefaults(defineProps<{
+    size?: "sm" | "md" | "lg"
+    disabled?: boolean
+    indeterminate?: boolean
+}>(), {
     size: "md",
     disabled: false,
     indeterminate: false

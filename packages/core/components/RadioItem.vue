@@ -13,12 +13,22 @@
 
 <script setup lang="ts">
 import { inject, toRef } from "vue"
+import type { Ref, ComputedRef, InjectionKey } from "vue"
 import { useRadioItem } from "../../composables/useRadio"
-import type { RadioItemProps, RadioGroupContext } from "../../types/radio"
-import { RADIO_GROUP_KEY } from "../../types/radio"
-import { COMPONENT_ERRORS } from "../../constants/errors"
 
-const props = withDefaults(defineProps<RadioItemProps>(), {
+interface RadioGroupContext {
+    model_value: Ref<string>
+    disabled: ComputedRef<boolean>
+    updateValue: (value: string) => void
+}
+
+const RADIO_GROUP_KEY: InjectionKey<RadioGroupContext> = Symbol("radio-group")
+
+const props = withDefaults(defineProps<{
+    value: string
+    size?: "sm" | "md" | "lg"
+    disabled?: boolean
+}>(), {
     size: "md",
     disabled: false
 })
@@ -26,7 +36,7 @@ const props = withDefaults(defineProps<RadioItemProps>(), {
 const context = inject<RadioGroupContext | null>(RADIO_GROUP_KEY, null)
 
 if (!context) {
-    throw new Error(COMPONENT_ERRORS.PROVIDER_NOT_FOUND)
+    throw new Error("RadioItem must be used within RadioGroup")
 }
 
 const composable = useRadioItem(toRef(() => props))
